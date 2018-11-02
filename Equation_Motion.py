@@ -18,7 +18,7 @@ Joystick_min = -100
 Joystick_max = 100
 
 
-# 1 Up Right ... 2 Up Left ... # 3 Down Right ... # 4 Down Left
+# 1 Up Left ... 2 Up Right ... # 3 Down Right ... # 4 Down Left
 def Motion_Equation(x,y,r,z):
 
     pwm =[z,0,0,0,0]
