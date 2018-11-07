@@ -9,25 +9,13 @@ pwm = Adafruit_PCA9685.PCA9685()
 pwm.set_pwm_freq(60)
 # ===========================================================
 class Hat:
-    def __init__(self):
-        self.Motors = []
-        # Motors 1 ,2 Front Motors
-        # Motors 3 ,4 Back Motors
-        # Motors 0 , 5 Z-Axis Motors
-        for i in range(6):
-            self.Motors.append(Motor(i))
-
-
-        self.Camera_Servo = servo(6)
+    def __init__(self,Motors, Servoes = None):
+        self.Motors = Motors
+        self.Servos = Servoes
 
     def Move(self,pwms):
-        for i in range(1, 5):
-            self.Motors[i].Set_Speed(pwms[i])
-
-        # Z-Axis Motors have the same PWM which is pwms[0] (Determined in QT)
-        self.Motors[0].Set_Speed(pwms[0])
-        self.Motors[5].Set_Speed(pwms[0])
-
+        for i, motor in enumerate(Motors):
+            motor.Set_Speed(pwms[i])
 
 # ===========================================================
 #====================== Servo  =============================
@@ -60,10 +48,11 @@ class Motor:
                 self.__speed = 0
 
         def Set_Speed(self,speed):
-                if speed == self.__speed:
+                if speed == self.__speed :
                     return
                 # check for joystick error
                 if speed < Brake_Force or speed > Forward_Force:
+                    print("PWM Range Error")
                     return
                 pwm.set_pwm(self.__pin, 0, speed)
                 self.__speed = speed
@@ -115,5 +104,16 @@ class Network(Observer):
             print('Bind failed. Error Code : ' + str(m[0]))
         self.s.listen(5)
     def update(self, arg):
+        pass
 
 
+# Motors = []
+# Motors.append(Motor(1))
+# Motors.append(Motor(2))
+# Motors.append(Motor(3))
+# Motors.append(Motor(4))
+# 
+# Motors.append(Motor(13))
+# Motors.append(Motor(14))
+# 
+# HAT = Hat(Motors)
