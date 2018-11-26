@@ -1,91 +1,171 @@
 import math
 
-def map(value, leftMin, leftMax, rightMin, rightMax):
-    # Figure out how 'wide' each range is
-    leftSpan = leftMax - leftMin
-    rightSpan = rightMax - rightMin
+class Motion:
+    def __init__(self,Qt_String:dict):
 
-    # Convert the left range into a 0-1 range (float)
-    valueScaled = float(value - leftMin) / float(leftSpan)
+        self.emit_signal = None
+        self._Qt_String = Qt_String.copy()
+        # =========== Constants ===========
+        self.Zero_thruster = 290
+        self.Zero_Servo = 450
+        self.Servo_min = 300
+        self.Servo_max = 600
+        self.Brake = 140
+        self.Forward = 440
+        self.Joystick_min = -100
+        self.Joystick_max = 100
+        self.Rotation_Efficiency = 2 / 3
+        self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
+        # =========== Motors ==============
+        self._horizontalMotors= {}
+        self._verticalMotors  = {}
+        self._servos =  {}
+        self._lights =  {}
+        # ======= initialization ===========
+        self._stopHorizontalMotors()
+        self._stopVerticalMotors()
+        self._setCamToNormalPosition()
+        self._turnLightOff()
+        # ==================================
 
-    # Convert the 0-1 range into a value in the right range.
-    return rightMin + (valueScaled * rightSpan)
+    def _stopHorizontalMotors(self):
+        self._horizontalMotors['Left_Front'] = self.Zero_thruster
+        self._horizontalMotors['Right_Front'] = self.Zero_thruster
+        self._horizontalMotors['Right_Back'] = self.Zero_thruster
+        self._horizontalMotors['Left_Back'] = self.Zero_thruster
+    def _stopVerticalMotors(self):
+        self._verticalMotors['Vertical_Right'] = self.Zero_thruster
+        self._verticalMotors['Vertical_Left'] = self.Zero_thruster
+    def _setCamToNormalPosition(self):
+        self._servos['Main_Cam'] = self.Zero_Servo
+    def _turnLightOff(self):
+        self._lights['light'] = 0
 
-Neutral = 290
-Brake = 140
-Forward = 440
-Joystick_min = -100
-Joystick_max = 100
+    @staticmethod
+    def map(value, leftMin, leftMax, rightMin, rightMax):
+        leftSpan = leftMax - leftMin
+        rightSpan = rightMax - rightMin
 
+        valueScaled = float(value - leftMin) / float(leftSpan)
+        return rightMin + (valueScaled * rightSpan)
+    def calculateHorizontalMotors_19(self):
+        x =self._Qt_String['x']
+        y =self._Qt_String['y']
+        r =self._Qt_String['r']
 
-# 1 Up Left ... 2 Up Right ... # 3 Down Right ... # 4 Down Left
-def Motion_Equation(x,y,r,z):
+        theta = math.atan2(y, x)
 
-    pwm =[z,0,0,0,0]
+        # ============== Skip ============================
+        # Check https://ibb.co/ir10AV
+        # R = math.hypot(x, y) * (max(abs(math.sin(theta)), abs(math.cos(theta))))
+        # ================================================
 
-    PureRotation = 0
-    R14 =1
-    R23 =1
+        # Convert to Circle Coordinates to limit the maximum speed
+        # Check https://www.xarg.org/2017/07/how-to-map-a-square-to-a-circle/
+        # ================================================
+        # The Circle Coordination Equation support [-1,1] range
+        X = x / self.Joystick_max
+        Y = y / self.Joystick_max
 
-    if r != 0:
-        # to Make the Radius of Circle from the instantaneous centre of rotation is 2 * ROV Width
-        # But it depends on Experiment .. and we can change that factor
-        amount_of_Rotation = map(abs(r),0,Joystick_max,1,2/3)
-        if x == 0 and y == 0:
-            PureRotation = r
-        elif y>0 and x ==0:
-            if r > 0:
-                R23 = amount_of_Rotation
+        Xc_2 = X * X * (1 - Y * Y / 2)
+        Yc_2 = Y * Y * (1 - X * X / 2)
+
+        R = math.sqrt(Xc_2 + Yc_2) * self.Joystick_max
+        # ================================================
+        # Axis Rotation
+        theta -= math.pi / 4
+        # Coefficient to Get the Best Speed of Motors
+        # Check https://ibb.co/fYUZ4q   # Check https://ibb.co/dSFqPf
+        coff = max(abs(math.sin(theta)), abs(math.cos(theta)))
+        # ============================= Rotation ====================
+        PureRotation = 0
+        Rotation_Factor_Right = 1
+        Rotation_Factor_Left = 1
+        if r != 0:
+            if R <= self.Joystick_max / 20:
+                PureRotation = r
+                R = 0
+            elif abs(theta) >= 0.707 and abs(theta) <= 0.864:
+                Rotation = Motion.map(abs(r), 0, self.Joystick_max, 1, self.Rotation_Efficiency)
+                if r > 0:
+                    Rotation_Factor_Right = Rotation
+                else:
+                    Rotation_Factor_Left = Rotation
+        # ============================================================
+        R_Cos_Coff = R * math.cos(theta) / coff
+        R_Sin_Coff = R * math.sin(theta) / coff
+
+        Motor1 = (R_Cos_Coff + PureRotation) * Rotation_Factor_Left
+        Motor2 = (R_Sin_Coff - PureRotation) * Rotation_Factor_Right
+        Motor3 = (R_Cos_Coff - PureRotation) * Rotation_Factor_Right
+        Motor4 = (R_Sin_Coff + PureRotation) * Rotation_Factor_Left
+
+        # Map the Joystick Coordinates to PWM Coordinates
+
+        self._horizontalMotors['Left_Front']  = int(self.Zero_thruster + Motor1 * self.PWM_Map_Coff)
+        self._horizontalMotors['Right_Front'] = int(self.Zero_thruster + Motor2 * self.PWM_Map_Coff)
+        self._horizontalMotors['Right_Back']  = int(self.Zero_thruster + Motor3 * self.PWM_Map_Coff)
+        self._horizontalMotors['Left_Back']  = int(self.Zero_thruster + Motor4 * self.PWM_Map_Coff)
+
+        # print(pwm)
+    def calculateVerticalMotors_19(self):
+        z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,self.Brake,self.Forward)
+        self._verticalMotors['Vertical_Right'] = int(z)
+        self._verticalMotors['Vertical_Left'] =  int(z)
+    def moveCamera(self):
+        if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] < self.Servo_max  :
+            self._servos['Main_Cam'] += 10
+        elif self._Qt_String['cam'] == -1 and self._servos['Main_Cam'] > self.Servo_min:
+            self._servos['Main_Cam'] -= 10
+    def light(self):
+        if self._lights['light'] < 1800:
+            self._lights['light'] += 500
+        else:
+            self._lights['light'] = 0
+
+    def SIGNAL_Referance(self,Observer_Pattern_Signal):
+        self.emit_signal=Observer_Pattern_Signal
+    def print_PWM(self):
+        print(self._horizontalMotors)
+        print(self._verticalMotors)
+        print(self._servos)
+        print(self._lights)
+    def update(self,args_tuple):
+
+        event_name = args_tuple[0]
+
+        if event_name == 'TCP_ERROR' :
+            self._stopVerticalMotors()
+            self._stopHorizontalMotors()
+            self._setCamToNormalPosition()
+            self._turnLightOff()
+            print('TCP_ERROR 8adaro beena')
+
+        elif event_name == 'TCP':
+            Qt_String = args_tuple[1]
+            self._Qt_String = Qt_String.copy()
+
+            if self._Qt_String['z'] !=0:
+                print('calculate vertical')
+                self._stopHorizontalMotors()
+                self.calculateVerticalMotors_19()
             else:
-                R14 = amount_of_Rotation
+                print('calculate Horizontal')
+                self._stopVerticalMotors()
+                self.calculateHorizontalMotors_19()
+            if self._Qt_String['cam'] != 0:
+                print('cam change')
+                self.moveCamera()
+            if self._Qt_String['light'] == 1:
+                print('light change')
+                self.light()
+            print('TCP_Event')
+            self.print_PWM()
 
-        elif y<0 and x ==0:
-            if r > 0:
-                R14 = amount_of_Rotation
-            else:
-                R23 = amount_of_Rotation
+        pwm = {}
+        pwm.update(self._horizontalMotors)
+        pwm.update(self._verticalMotors)
+        pwm.update(self._servos)
+        pwm.update(self._lights)
 
-
-    # Convert to Circle Coordinates to limit the maximum speed
-    # ================================================
-    # The Circle Coordination support [-1,1] range
-    x = map(x,Joystick_min,Joystick_max,-1,1)
-    y = map(y,Joystick_min,Joystick_max,-1,1)
-
-    Xc = x*math.sqrt(1-y*y/2)
-    Yc = y*math.sqrt(1-x*x/2)
-
-    Xc = map(Xc,-1,1,Joystick_min,Joystick_max)
-    Yc = map(Yc,-1,1,Joystick_min,Joystick_max)
-    #================================================
-
-    # Axis Rotation
-    X = Xc*math.cos(math.pi/4)+Yc*math.sin(math.pi/4)
-    Y = -Xc*math.sin(math.pi/4)+Yc*math.cos(math.pi/4)
-
-    R = math.sqrt(X*X+Y*Y)
-    theta = math.atan2(Y,X)
-
-    coff=1
-
-    # in this durations tan theta is < 1 but > sin (the same theta)
-    if ( theta >= -math.pi/4 and theta <= math.pi/4 ) or ( theta > -math.pi and theta <= -3*math.pi/4 ) or ( theta > 3*math.pi/4 and theta <= math.pi) :
-        coff = abs(math.cos(theta))
-    # in this durations tan theta is > 1 then cot theta < 1
-    elif (theta > math.pi/4 and theta <= 3*math.pi/4) or (theta > -3*math.pi/4 and theta < -math.pi/4) :
-        coff = abs(math.sin(theta))
-
-    Motor1 =( (R*math.cos(theta) / coff) +PureRotation )*R14
-    Motor2= ( (R*math.sin(theta) / coff) -PureRotation )*R23
-    Motor3= ( (R*math.cos(theta) / coff) -PureRotation )*R23
-    Motor4= ( (R*math.sin(theta) / coff) +PureRotation )*R14
-
-    # Convert Joystick Coordinates to PWM
-    pwm[1] = map(Motor1,Joystick_min,Joystick_max,Brake,Forward)
-    pwm[2] = map(Motor2,Joystick_min,Joystick_max,Brake,Forward)
-    pwm[3] = map(Motor3,Joystick_min,Joystick_max,Brake,Forward)
-    pwm[4] = map(Motor4,Joystick_min,Joystick_max,Brake,Forward)
-    pwm[0] = map(pwm[0],Joystick_min,Joystick_max,Brake,Forward)
-
-    print (pwm)
-Motion_Equation(0,-100,0,0)
+        self.emit_signal('PWM',pwm)
