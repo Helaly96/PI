@@ -6,15 +6,15 @@ class Motion:
         self.emit_signal = None
         self._Qt_String = Qt_String.copy()
         # =========== Constants ===========
+        self.Forward = 440
         self.Zero_thruster = 290
+        self.Brake = 140
         self.Zero_Servo = 450
         self.Servo_min = 300
         self.Servo_max = 600
-        self.Brake = 140
-        self.Forward = 440
         self.Joystick_min = -100
         self.Joystick_max = 100
-        self.Rotation_Efficiency = 2 / 3
+        self.Rotation_Efficiency = 0.23
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         # =========== Motors ==============
         self._horizontalMotors= {}
@@ -77,28 +77,21 @@ class Motion:
         # Coefficient to Get the Best Speed of Motors
         # Check https://ibb.co/fYUZ4q   # Check https://ibb.co/dSFqPf
         coff = max(abs(math.sin(theta)), abs(math.cos(theta)))
-        # ============================= Rotation ====================
-        PureRotation = 0
-        Rotation_Factor_Right = 1
-        Rotation_Factor_Left = 1
-        if r != 0:
-            if R <= self.Joystick_max / 20:
-                PureRotation = r
-                R = 0
-            elif abs(theta) >= 0.707 and abs(theta) <= 0.864:
-                Rotation = Motion.map(abs(r), 0, self.Joystick_max, 1, self.Rotation_Efficiency)
-                if r > 0:
-                    Rotation_Factor_Right = Rotation
-                else:
-                    Rotation_Factor_Left = Rotation
-        # ============================================================
+        
+        # ============ ( C ) is Rotation Efficiency =================
+        C = self.map(abs(r),0,self.Joystick_max,0,self.Rotation_Efficiency)
+        # C = self.Rotation_Efficiency
+        if R ==0:
+            C = 1
+        # ===========================================================
+
         R_Cos_Coff = R * math.cos(theta) / coff
         R_Sin_Coff = R * math.sin(theta) / coff
 
-        Motor1 = (R_Cos_Coff + PureRotation) * Rotation_Factor_Left
-        Motor2 = (R_Sin_Coff - PureRotation) * Rotation_Factor_Right
-        Motor3 = (R_Cos_Coff - PureRotation) * Rotation_Factor_Right
-        Motor4 = (R_Sin_Coff + PureRotation) * Rotation_Factor_Left
+        Motor1 = (1-C) * R_Cos_Coff + C *r
+        Motor2 = (1-C) * R_Sin_Coff - C *r
+        Motor3 = (1-C) * R_Cos_Coff - C *r
+        Motor4 = (1-C) * R_Sin_Coff + C *r
 
         # Map the Joystick Coordinates to PWM Coordinates
 
