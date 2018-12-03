@@ -28,10 +28,7 @@ class Hat:
             self._devices[device_name]['current'] =pwms[device_name]
             self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
 
-    def update(self, args_tuple):
-
-        event_name = args_tuple[0]
-        pwm = args_tuple[1]
+    def update(self, event_name,pwm):
 
         if event_name == "PWM":
             self._updatePWM(pwm)
