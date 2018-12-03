@@ -3,7 +3,7 @@ class Observer_Pattern:
         self._eventListeners ={}
     def registerEventListener(self, event_name , listener_update):
         # if new event => value = new list
-        if self._eventListeners[event_name] == None:
+        if self._eventListeners.get(event_name) == None:
             self._eventListeners[event_name] = [listener_update]
         # if old event => add the listener to the list
         else:
