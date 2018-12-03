@@ -18,7 +18,10 @@ class TCP :
         self._selector = selectors.DefaultSelector()
         self._create_Socket()
         self._bind_Listen()
-
+        
+    def __del__(self):
+        self._close()
+        
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self._emit_Signal=Observer_Pattern_Signal
 
