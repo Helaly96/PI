@@ -1,20 +1,19 @@
 import math
-
 class Motion:
-    def __init__(self,Qt_String:dict):
+    def __init__(self):
 
         self.emit_signal = None
-        self._Qt_String = Qt_String.copy()
+        self._Qt_String = None
         # =========== Constants ===========
-        self.Forward = 440
         self.Zero_thruster = 290
-        self.Brake = 140
         self.Zero_Servo = 450
         self.Servo_min = 300
         self.Servo_max = 600
+        self.Brake = 140
+        self.Forward = 440
         self.Joystick_min = -100
         self.Joystick_max = 100
-        self.Rotation_Efficiency = 0.23
+        self.Rotation_Efficiency = 0.231
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         # =========== Motors ==============
         self._horizontalMotors= {}
@@ -77,7 +76,6 @@ class Motion:
         # Coefficient to Get the Best Speed of Motors
         # Check https://ibb.co/fYUZ4q   # Check https://ibb.co/dSFqPf
         coff = max(abs(math.sin(theta)), abs(math.cos(theta)))
-        
         # ============ ( C ) is Rotation Efficiency =================
         C = self.map(abs(r),0,self.Joystick_max,0,self.Rotation_Efficiency)
         # C = self.Rotation_Efficiency
@@ -92,6 +90,7 @@ class Motion:
         Motor2 = (1-C) * R_Sin_Coff - C *r
         Motor3 = (1-C) * R_Cos_Coff - C *r
         Motor4 = (1-C) * R_Sin_Coff + C *r
+
 
         # Map the Joystick Coordinates to PWM Coordinates
 
@@ -119,13 +118,10 @@ class Motion:
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
     def print_PWM(self):
-        print(self._horizontalMotors)
-        print(self._verticalMotors)
-        print(self._servos)
-        print(self._lights)
-    def update(self,args_tuple):
+        print(self._horizontalMotors,self._verticalMotors)
 
-        event_name = args_tuple[0]
+    def update(self,event_name,Qt_String):
+
 
         if event_name == 'TCP_ERROR' :
             self._stopVerticalMotors()
@@ -135,25 +131,23 @@ class Motion:
             print('TCP_ERROR 8adaro beena')
 
         elif event_name == 'TCP':
-            Qt_String = args_tuple[1]
             self._Qt_String = Qt_String.copy()
 
             if self._Qt_String['z'] !=0:
-                print('calculate vertical')
+#                print('calculate vertical')
                 self._stopHorizontalMotors()
                 self.calculateVerticalMotors_19()
             else:
-                print('calculate Horizontal')
+#                print('calculate Horizontal')
                 self._stopVerticalMotors()
                 self.calculateHorizontalMotors_19()
-            if self._Qt_String['cam'] != 0:
-                print('cam change')
-                self.moveCamera()
-            if self._Qt_String['light'] == 1:
-                print('light change')
-                self.light()
-            print('TCP_Event')
-            self.print_PWM()
+#             if self._Qt_String['cam'] != 0:
+# #               print('cam change')
+#                 self.moveCamera()
+#             if self._Qt_String['light'] == 1:
+# #                print('light change')
+#                 self.light()
+# #            print('TCP_Event')
 
         pwm = {}
         pwm.update(self._horizontalMotors)
@@ -162,3 +156,5 @@ class Motion:
         pwm.update(self._lights)
 
         self.emit_signal('PWM',pwm)
+
+        self.print_PWM()
