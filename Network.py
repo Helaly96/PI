@@ -2,11 +2,10 @@
 # Check https://docs.python.org/3/library/selectors.html
 import selectors
 import socket
-
 class TCP :
-    def __init__(self,ip:str,port:int, streamingIP:int ,stream_ports:list):
+    def __init__(self,ip:str,port:int, streamingIP:str ,stream_ports:list):
         self._buffer_size = 1024
-        self.Num_Of_tokens = 6
+        self.Num_Of_tokens = 4
         self._ip = ip
         self._port = port
         self._streamIP = streamingIP
@@ -14,7 +13,7 @@ class TCP :
         self._conn = None
         self._client_address = None
         self._emit_Signal = None
-
+        self._stream_disconect = False
 
         self._selector = selectors.DefaultSelector()
         self._create_Socket()
@@ -33,7 +32,6 @@ class TCP :
             self._socket.listen(1)
         except socket.error:
             print('socket error while binding socket')
-            self._ip = input('ip: ')
             self._port = int(input('port: '))
             self._bind_Listen()
             return
@@ -49,34 +47,40 @@ class TCP :
             new_conn.close()
             print("something tries to connect to pi ")
             return
-
+        # ===================== TCP Server ========================
         self._conn , self._client_address = self._socket.accept()
         print('Connected ya ray2      ',self._client_address)
-
         self._conn.setblocking(False)
-        self._selector.register(self._conn,selectors.EVENT_READ,self._recv) # Start listening for a msg just after accept (connecting with client)
-        
-        
-#         # ==================== Gstreamer ==========================
-#         import VideoStream
-#         self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streamingPort1 + "," + self._streamingIP + ":" + self._streamingPort2 + "," + self._streamingIP + ":" + self._streamingPort3 + " sync=false"
-#         self._pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg, width=1920, height=1080, framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamingIP + " port=" + self._streamingPort4 + " sync=false"
-#         self._videoStream = VideoStream.VideoStream(self._pipeline1)
-#         self._videoStream2 = VideoStream.VideoStream(self._pipeline2)
-#         self._videoStream.start()
-#         self._videoStream2.start()
-#         # =========================================================
-        
-    def _recv(self):
-        data = str()
-        try:
-            data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
-        except :
-            if not data:
-                self._close()
-                return
+        self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
+        # =========================================================
 
-        Qt_string = self.Split_to_Dict(data)
+        #
+        # # ==================== Gstreamer ==========================
+        # import VideoStream
+        # #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + sel$
+        # #self._videoStream = VideoStream.VideoStream(self._pipeline1)
+        # #self._videoStream.start()
+        # self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[0]  # + " sync=false"
+        # self._videoStream2 = VideoStream.VideoStream(self._pipeline2)
+        # self._videoStream2.start()
+        # # =========================================================
+        # if self._stream_disconect:
+        #     self._videoStream2.start()
+        #     self._stream_disconect =False
+
+    def _recv(self):
+        data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
+        if not data:
+            self._stream_disconect = True
+            self._close()
+            return
+
+        Qt_string = str()
+        try:
+            Qt_string = self.Split_to_Dict(data)
+        except Exception as e:
+            print(e,'wrong msg in recv')
+            return
 
         if self._emit_Signal is None:
             print("emit signal dose not exist")
@@ -85,15 +89,19 @@ class TCP :
         self._emit_Signal("TCP",Qt_string)
 
     def _close(self):
-        # self._emit_Signal('TCP_ERROR',{})
+        self._emit_Signal('TCP_ERROR',{})
         if self._conn is not None:
             self._selector.unregister(self._conn)
             self._conn.close()
         self._conn = None
+#         if self._stream_disconect:
+#     #       self._videoStream2.pause()
+#
+# #       self._videoStream2.close()
 
 
     def Split_to_Dict(self,qt_string: str):
-        tokens = qt_string.split(';')
+        tokens = qt_string.split(',')
         # delete the last element (it is empty)
         del tokens[len(tokens) - 1]
 
@@ -102,23 +110,20 @@ class TCP :
         if len(tokens) != count:
             tokens_clone = tokens
             tokens = [""] * count
-            for i in range(count):
-                tokens[i] = tokens_clone[(len(tokens_clone) - count) + i]
-            print(tokens)
-
+            try:
+                for i in range(count):
+                    tokens[i] = tokens_clone[(len(tokens_clone) - count) + i]
+            except IndexError:
+                print("Rubbish Qt string")
         for term in tokens:
-            temp_list = term.split(':')
+            temp_list = term.split('=')
             Qt_string[temp_list[0]] = int(temp_list[1])
 
-        print(Qt_string)
         return Qt_string
 
     def main_Loop(self):
+        print('Wait for zeft Qt')
         while True:
             events = self._selector.select()
             for key, mask in events:
               key.data()
-
-TCP_OBJ = TCP('127.0.0.1',8082,1000000,[])
-TCP_OBJ.main_Loop()
-
