@@ -19,9 +19,6 @@ class TCP :
         self._create_Socket()
         self._bind_Listen()
         
-    def __del__(self):
-        self._close()
-        
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self._emit_Signal=Observer_Pattern_Signal
 
@@ -72,11 +69,14 @@ class TCP :
         #     self._stream_disconect =False
 
     def _recv(self):
-        data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
-        if not data:
-            self._stream_disconect = True
-            self._close()
-            return
+        data=str()
+        try:
+            data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
+        except socket.error:
+            if not data:
+                self._stream_disconect = True
+                self._close()
+                return
 
         Qt_string = str()
         try:
