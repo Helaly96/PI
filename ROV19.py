@@ -16,7 +16,7 @@ class ROV_19:
         self.Hat_address = 0x40
         self.Motors_Frequency = 50
 
-        # Qt String .. 'x=0,y=0,r=0,z=0,cam=0,light=0'
+        # Qt String .. 'x=0,y=0,r=0,z=0,Cam_H_Servo=0,Cam_V_Servo=0,Back_Cam=0,light=0'
         # ========================================================
 
         self.observer_pattern = Observer_Pattern()
@@ -30,8 +30,10 @@ class ROV_19:
         self.hat.add_Device('Left_Back', 4, self.motion.Zero_thruster)
         self.hat.add_Device('Vertical_Right', 5, self.motion.Zero_thruster)
         self.hat.add_Device('Vertical_Left', 6, self.motion.Zero_thruster)
-        self.hat.add_Device('Main_Cam', 7, self.motion.Zero_Servo)
-        self.hat.add_Device('light', 8, 0)
+        self.hat.add_Device('Cam_H_Servo', 7, self.motion.Zero_Servo)
+        self.hat.add_Device('Cam_V_Servo', 8, self.motion.Zero_Servo)
+        self.hat.add_Device('Back_Cam', 9, self.motion.Zero_Servo)
+        self.hat.add_Device('light', 10, 0)
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
