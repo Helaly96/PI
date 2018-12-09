@@ -77,7 +77,12 @@ class TCP :
                 self._stream_disconect = True
                 self._close()
                 return
-
+            
+        if data == 'esc':
+            self.__del__()
+            print('Esc Program')
+            sys.exit(0)
+            
         Qt_string = str()
         try:
             Qt_string = self.Split_to_Dict(data)
