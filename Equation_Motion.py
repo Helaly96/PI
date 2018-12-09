@@ -1,4 +1,3 @@
-import math
 class Motion:
     def __init__(self):
 
@@ -6,8 +5,8 @@ class Motion:
         self._Qt_String = None
         # =========== Constants ===========
         self.Zero_thruster = 290
-        self.Zero_Servo = 450
-        self.Servo_min = 300
+        self.Zero_Servo = 225
+        self.Servo_min = 150
         self.Servo_max = 600
         self.Brake = 140
         self.Forward = 440
@@ -36,7 +35,9 @@ class Motion:
         self._verticalMotors['Vertical_Right'] = self.Zero_thruster
         self._verticalMotors['Vertical_Left'] = self.Zero_thruster
     def _setCamToNormalPosition(self):
-        self._servos['Main_Cam'] = self.Zero_Servo
+        self._servos['Cam_H_Servo'] = self.Zero_Servo
+        self._servos['Cam_V_Servo'] = self.Zero_Servo
+        self._servos['Back_Cam'] = self.Zero_Servo
     def _turnLightOff(self):
         self._lights['light'] = 0
 
@@ -104,11 +105,12 @@ class Motion:
         z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,self.Brake,self.Forward)
         self._verticalMotors['Vertical_Right'] = int(z)
         self._verticalMotors['Vertical_Left'] =  int(z)
-    def moveCamera(self):
-        if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] < self.Servo_max  :
-            self._servos['Main_Cam'] += 10
-        elif self._Qt_String['cam'] == -1 and self._servos['Main_Cam'] > self.Servo_min:
-            self._servos['Main_Cam'] -= 10
+    def moveCamera(self, camera:str , value:int):
+        if value == 1 and self._servos[camera] < self.Servo_max  :
+            self._servos[camera] += value
+        elif value == -1 and self._servos[camera] < self.Servo_max:
+            self._servos[camera] += value
+        print(self._servos)
     def light(self):
         if self._lights['light'] < 1800:
             self._lights['light'] += 500
@@ -141,13 +143,15 @@ class Motion:
 #                print('calculate Horizontal')
                 self._stopVerticalMotors()
                 self.calculateHorizontalMotors_19()
-#             if self._Qt_String['cam'] != 0:
-# #               print('cam change')
-#                 self.moveCamera()
-#             if self._Qt_String['light'] == 1:
-# #                print('light change')
-#                 self.light()
-# #            print('TCP_Event')
+            if self._Qt_String['Cam_H_Servo'] != 0:
+                self.moveCamera('Cam_H_Servo',self._Qt_String['Cam_H_Servo'])
+            if self._Qt_String['Cam_V_Servo'] != 0:
+                self.moveCamera('Cam_V_Servo',self._Qt_String['Cam_V_Servo'])
+            if self._Qt_String['Back_Cam'] !=0 :
+                self.moveCamera('Back_Cam',self._Qt_String['Back_Cam'])
+            if self._Qt_String['light'] == 1:
+                self.light()
+#            print('TCP_Event')
 
         pwm = {}
         pwm.update(self._horizontalMotors)
