@@ -1,5 +1,5 @@
 
-# raspberryyyyyyyyyyyyyyyyyyyyyyyyyy
+# raspberryyyyyyyyyyyyyyyyyyyyyyyyyy 22222222
 class Hat:
     def __init__(self, address, frequency):
         self.address = address
