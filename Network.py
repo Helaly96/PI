@@ -1,11 +1,11 @@
-# Check https://pymotw.com/3/selectors/
-# Check https://docs.python.org/3/library/selectors.html
 import selectors
 import socket
+import sys
+
 class TCP :
-    def __init__(self,ip:str,port:int, streamingIP:str ,stream_ports:list):
+    def __init__(self,selector,ip:str,port:int, streamingIP:str ,stream_ports:list):
         self._buffer_size = 1024
-        self.Num_Of_tokens = 4
+        self.Num_Of_tokens = 8
         self._ip = ip
         self._port = port
         self._streamIP = streamingIP
@@ -15,10 +15,11 @@ class TCP :
         self._emit_Signal = None
         self._stream_disconect = False
 
-        self._selector = selectors.DefaultSelector()
+
+        self._selector = selector
         self._create_Socket()
         self._bind_Listen()
-        
+
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self._emit_Signal=Observer_Pattern_Signal
 
@@ -57,7 +58,7 @@ class TCP :
         #
         # # ==================== Gstreamer ==========================
         # import VideoStream
-        # #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + sel$
+        # #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + s$
         # #self._videoStream = VideoStream.VideoStream(self._pipeline1)
         # #self._videoStream.start()
         # self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[0]  # + " sync=false"
@@ -77,19 +78,13 @@ class TCP :
                 self._stream_disconect = True
                 self._close()
                 return
-            
-        if data == 'esc':
-            self.__del__()
-            print('Esc Program')
-            sys.exit(0)
-            
+
         Qt_string = str()
         try:
             Qt_string = self.Split_to_Dict(data)
         except Exception as e:
             print(e,'wrong msg in recv')
             return
-
         if self._emit_Signal is None:
             print("emit signal dose not exist")
             return
@@ -132,6 +127,13 @@ class TCP :
     def main_Loop(self):
         print('Wait for zeft Qt')
         while True:
-            events = self._selector.select()
-            for key, mask in events:
-              key.data()
+            try:
+                events = self._selector.select()
+                for key, mask in events:
+                    key.data()
+            except KeyboardInterrupt:
+                print(' End')
+                self._close()
+                return
+
+
