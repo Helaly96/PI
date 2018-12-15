@@ -1,5 +1,4 @@
 
-# raspberryyyyyyyyyyyyyyyyyyyyyyyyyy 22222222
 class Hat:
     def __init__(self, address, frequency):
         self.address = address
@@ -28,3 +27,4 @@ class Hat:
 
         if event_name == "PWM":
             self._updatePWM(pwm)
+
