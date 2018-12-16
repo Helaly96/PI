@@ -1,17 +1,18 @@
+import math
 class Motion:
     def __init__(self):
 
         self.emit_signal = None
         self._Qt_String = None
         # =========== Constants ===========
-        self.Zero_thruster = 290
+        self.Zero_thruster = 305
         self.Zero_Servo = 225
         self.Servo_min = 150
         self.Servo_max = 600
-        self.Brake = 140
-        self.Forward = 440
-        self.Joystick_min = -100
-        self.Joystick_max = 100
+        self.Brake = 197
+        self.Forward = 412
+        self.Joystick_min = -32786
+        self.Joystick_max = 32786
         self.Rotation_Efficiency = 0.231
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         # =========== Motors ==============
@@ -112,7 +113,7 @@ class Motion:
     def moveCamera(self):
         if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] < self.Servo_max  :
             self._servos['Main_Cam'] += 10
-        elif self._Qt_String['cam'] == -1 and self._servos['Main_Cam'] > self.Servo_min:
+        elif self._Qt_String['cam'] == 4 and self._servos['Main_Cam'] > self.Servo_min:
             self._servos['Main_Cam'] -= 10
 
     def light(self):
@@ -154,9 +155,9 @@ class Motion:
 #             if self._Qt_String['Back_Cam'] !=0 :
 #                 self.moveCamera('Back_Cam',self._Qt_String['Back_Cam'])
 
-             if self._Qt_String['cam'] != 0:
+            if self._Qt_String['cam'] != 0:
                  self.moveCamera()
-             if self._Qt_String['light'] == 1:
+            if self._Qt_String['light'] !=0:
                  self.light()
 
         pwm = {}

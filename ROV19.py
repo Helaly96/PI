@@ -1,6 +1,6 @@
 from Network import *
-# from HAT import *
-from DummyHat import *
+from HAT import *
+#from DummyHat import *
 from Equation_Motion import *
 from Observer_Pattern import *
 from Sensor import *
@@ -14,14 +14,16 @@ class ROV_19:
 #        self.RaspberryPi_IP = '111.111.111.111'
 #        self.Qt_IP = '111.111.111.112'
 #        self.RaspberryPi_IP = '127.0.0.1'
-        self.Qt_IP = '127.0.0.1'
-        self.RaspberryPi_IP = '192.168.1.15'
+#        self.Qt_IP = '127.0.0.1'
+#        self.RaspberryPi_IP = '192.168.1.15'
+        
 
+        self.RaspberryPi_IP = '10.0.1.55'
+        self.Qt_IP = '10.0.1.54'
 
-
-        self.stream_IP = '111.111.111.100' #sink ( Laptop's address )
-        self.Port = 8082
-        self.stream_Ports = ['5022','','']
+        self.stream_IP = '10.0.1.54' #sink ( Laptop's address )
+        self.Port = 9005
+        self.stream_Ports = ['5022','1234','']
         self.UDP_IP = "127.0.0.1"
         self.UDP_Port = 5005
         self.Hat_address = 0x40
@@ -39,17 +41,17 @@ class ROV_19:
         self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
 #        self.sensor = Dummy_Sensor()
 
-        self.hat.add_Device('Left_Front', 1, self.motion.Zero_thruster)
-        self.hat.add_Device('Right_Front', 2, self.motion.Zero_thruster)
+        self.hat.add_Device('Left_Front', 11, self.motion.Zero_thruster)
+        self.hat.add_Device('Right_Front', 5, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Back', 3,self.motion.Zero_thruster)
-        self.hat.add_Device('Left_Back', 4, self.motion.Zero_thruster)
-        self.hat.add_Device('Vertical_Right', 5, self.motion.Zero_thruster)
-        self.hat.add_Device('Vertical_Left', 6, self.motion.Zero_thruster)
+        self.hat.add_Device('Left_Back',9 , self.motion.Zero_thruster)
+        self.hat.add_Device('Vertical_Right', 0, self.motion.Zero_thruster)
+        self.hat.add_Device('Vertical_Left', 7, self.motion.Zero_thruster)
 #        self.hat.add_Device('Cam_H_Servo', 7, self.motion.Zero_Servo)
 #        self.hat.add_Device('Cam_V_Servo', 8, self.motion.Zero_Servo)
 #        self.hat.add_Device('Back_Cam', 9, self.motion.Zero_Servo)
-        self.hat.add_Device('Main_Cam',12,self.motion.Zero_Servo)
-        self.hat.add_Device('light', 10, 0)
+        self.hat.add_Device('Main_Cam',15,self.motion.Zero_Servo)
+        self.hat.add_Device('light', 13, 0)
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)

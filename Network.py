@@ -5,7 +5,7 @@ import sys
 class TCP :
     def __init__(self,selector,ip:str,port:int, streamingIP:str ,stream_ports:list):
         self._buffer_size = 1024
-        self.Num_Of_tokens = 8
+        self.Num_Of_tokens = 6
         self._ip = ip
         self._port = port
         self._streamIP = streamingIP
@@ -57,13 +57,14 @@ class TCP :
 
         #
         # # ==================== Gstreamer ==========================
-        # import VideoStream
-        # #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + s$
-        # #self._videoStream = VideoStream.VideoStream(self._pipeline1)
-        # #self._videoStream.start()
-        # self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[0]  # + " sync=false"
-        # self._videoStream2 = VideoStream.VideoStream(self._pipeline2)
-        # self._videoStream2.start()
+        import VideoStream
+        #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + s$
+#        self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[1]
+#        self._videoStream = VideoStream.VideoStream(self._pipeline1)
+#        self._videoStream.start()
+        self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[0]  # + " sync=false"
+        self._videoStream2 = VideoStream.VideoStream(self._pipeline2)
+        self._videoStream2.start()
         # # =========================================================
         # if self._stream_disconect:
         #     self._videoStream2.start()
@@ -100,7 +101,7 @@ class TCP :
 #         if self._stream_disconect:
 #     #       self._videoStream2.pause()
 #
-# #       self._videoStream2.close()
+        self._videoStream2.close()
 
 
     def Split_to_Dict(self,qt_string: str):
