@@ -54,28 +54,25 @@ class TCP :
         self._conn.setblocking(False)
         self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
         # =========================================================
-
-        #
-        # # ==================== Gstreamer ==========================
-        import VideoStream
-        #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + s$
-#        self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[1]
-#        self._videoStream = VideoStream.VideoStream(self._pipeline1)
-#        self._videoStream.start()
-        self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[0]  # + " sync=false"
-        self._videoStream2 = VideoStream.VideoStream(self._pipeline2)
-        self._videoStream2.start()
-        # # =========================================================
-        # if self._stream_disconect:
-        #     self._videoStream2.start()
-        #     self._stream_disconect =False
+#         # # ==================== Gstreamer ==========================
+#         import VideoStream
+#         #self._pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self._streamingIP + ":" + self._streaming_ports[0] + "," + self._streamingIP + ":" + s$
+# #        self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[1]
+# #        self._videoStream = VideoStream.VideoStream(self._pipeline1)
+# #        self._videoStream.start()
+#         self._pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self._streamIP + " port=" + self._streaming_ports[0]  # + " sync=false"
+#         self._videoStream2 = VideoStream.VideoStream(self._pipeline2)
+#         self._videoStream2.start()
+#         # # =========================================================
+#         # if self._stream_disconect:
+#         #     self._videoStream2.start()
+#         #     self._stream_disconect =False
 
     def _recv(self):
         data=str()
         try:
             data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
         except socket.error:
-            if not data:
                 self._stream_disconect = True
                 self._close()
                 return
@@ -86,6 +83,9 @@ class TCP :
         except Exception as e:
             print(e,'wrong msg in recv')
             return
+        if Qt_string == None:
+            return
+
         if self._emit_Signal is None:
             print("emit signal dose not exist")
             return
@@ -99,9 +99,9 @@ class TCP :
             self._conn.close()
         self._conn = None
 #         if self._stream_disconect:
-#     #       self._videoStream2.pause()
+#            self._videoStream2.pause()
 #
-        self._videoStream2.close()
+#        self._videoStream2.close()
 
 
     def Split_to_Dict(self,qt_string: str):
@@ -111,7 +111,7 @@ class TCP :
 
         Qt_string = {}
         count = self.Num_Of_tokens
-        if len(tokens) != count:
+        if len(tokens) > count:
             tokens_clone = tokens
             tokens = [""] * count
             try:
@@ -119,11 +119,16 @@ class TCP :
                     tokens[i] = tokens_clone[(len(tokens_clone) - count) + i]
             except IndexError:
                 print("Rubbish Qt string")
+        elif len(tokens) < count:
+            print('num of tokens error')
+            return None
+
         for term in tokens:
             temp_list = term.split('=')
             Qt_string[temp_list[0]] = int(temp_list[1])
 
         return Qt_string
+
 
     def main_Loop(self):
         print('Wait for zeft Qt')
