@@ -16,11 +16,9 @@ class ROV_19:
 #        self.RaspberryPi_IP = '127.0.0.1'
 #        self.Qt_IP = '127.0.0.1'
 #        self.RaspberryPi_IP = '192.168.1.15'
-        
 
         self.RaspberryPi_IP = '10.0.1.55'
         self.Qt_IP = '10.0.1.54'
-
         self.stream_IP = '10.0.1.54' #sink ( Laptop's address )
         self.Port = 9005
         self.stream_Ports = ['5022','1234','']

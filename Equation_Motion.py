@@ -141,13 +141,12 @@ class Motion:
             self._Qt_String = Qt_String.copy()
 
             if self._Qt_String['z'] !=0:
-#                print('calculate vertical')
                 self._stopHorizontalMotors()
                 self.calculateVerticalMotors_19()
             else:
-#                print('calculate Horizontal')
                 self._stopVerticalMotors()
                 self.calculateHorizontalMotors_19()
+
 #             if self._Qt_String['Cam_H_Servo'] != 0:
 #                 self.moveCamera('Cam_H_Servo',self._Qt_String['Cam_H_Servo'])
 #             if self._Qt_String['Cam_V_Servo'] != 0:
