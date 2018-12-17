@@ -5,8 +5,8 @@ class UDP:
         self._port=port
         self.socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
-    def update(self,event,message):
-        if event == 'SENSOR':
-            message=str(message).encode(encoding="UTF-8")
+    def update(self,event,pressure,z):
+        if event == 'CSV':
+            message=(str(pressure)+" "+str(z)).encode(encoding="UTF-8")
             self.socket.sendto(message,(self._targetIp,self._port))
 
