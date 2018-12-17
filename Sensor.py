@@ -3,13 +3,14 @@ import ms5837
 import time
 
 
-class Sensor_Interrupter :
+class Sensor :
     def __init__(self,time):
         self.pressure = 0
+        self.ex_pressure=0
         self.pwm = 305
         self.sensor = ms5837.MS5837_30BA()
         self.time = time
-
+        print("sersnor")
         if not self.sensor.init():
             exit(1)
         if not self.sensor.read():
@@ -21,21 +22,21 @@ class Sensor_Interrupter :
         self.freshwaterDepth = self.sensor.depth()  # default is freshwater
         self.sensor.setFluidDensity(ms5837.DENSITY_SALTWATER)
 
-        time.sleep(5)
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
 
     def interrupt(self,update,name):
         self.update_pressure()
-        update(name,self.pressure,self.pwm)
+        if abs(self.ex_pressure-self.pressure ) <= 1:
+            update(name,self.pressure,self.pwm)
         threading.Timer(self.time,self.interrupt,[update,name]).start()
 
     def update_pressure(self):
-
+        self.ex_pressure = self.pressure
         if self.sensor.read():
             self.pressure = self.sensor.pressure()
-            print("Pressure: ", sensor.pressure(), "Temperature: ", sensor.temperature())
+            print("Pressure: ",self.sensor.pressure(), "Temperature: ", self.sensor.temperature())
         else:
                 print("feh moshkela fel sensor")
 

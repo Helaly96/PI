@@ -9,10 +9,10 @@ class Motion:
         self.Zero_Servo = 225
         self.Servo_min = 150
         self.Servo_max = 600
-        self.Brake = 197
-        self.Forward = 412
-        self.Joystick_min = -32786
-        self.Joystick_max = 32786
+        self.Brake = 225
+        self.Forward = 387
+        self.Joystick_min = -100
+        self.Joystick_max = 100
         self.Rotation_Efficiency = 0.231
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         # =========== Motors ==============
@@ -23,8 +23,8 @@ class Motion:
         # ======= initialization ===========
         self._stopHorizontalMotors()
         self._stopVerticalMotors()
-        self._setCamToNormalPosition()
-        self._turnLightOff()
+#        self._setCamToNormalPosition()
+#        self._turnLightOff()
         # ==================================
 
     def _stopHorizontalMotors(self):
@@ -133,8 +133,8 @@ class Motion:
         if event_name == 'TCP_ERROR' :
             self._stopVerticalMotors()
             self._stopHorizontalMotors()
-            self._setCamToNormalPosition()
-            self._turnLightOff()
+ #           self._setCamToNormalPosition()
+ #           self._turnLightOff()
             print('TCP_ERROR 8adaro beena')
 
         elif event_name == 'TCP':
@@ -154,16 +154,16 @@ class Motion:
 #             if self._Qt_String['Back_Cam'] !=0 :
 #                 self.moveCamera('Back_Cam',self._Qt_String['Back_Cam'])
 
-            if self._Qt_String['cam'] != 0:
-                 self.moveCamera()
-            if self._Qt_String['light'] !=0:
-                 self.light()
+#            if self._Qt_String['cam'] != 0:
+#                 self.moveCamera()
+#            if self._Qt_String['light'] !=0:
+#                 self.light()
 
         pwm = {}
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
-        pwm.update(self._servos)
-        pwm.update(self._lights)
+#        pwm.update(self._servos)
+#        pwm.update(self._lights)
 
         self.emit_signal('PWM',pwm)
 
