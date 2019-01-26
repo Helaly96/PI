@@ -1,0 +1,56 @@
+JPEG transmitter:
+gst-launch-1.0 v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000
+
+JPEG receiver:
+gst-launch-1.0 udpsrc port=5000 ! application/x-rtp,encoding-name=JPEG,payload=26 ! rtpjpegdepay ! jpegdec ! xvimagesink name=sink  force-aspect-ratio=false
+
+
+
+MultiStreaming
+gst-launch-1.0 v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022
+
+
+
+H264 transmitter :
+gst-launch-1.0 v4l2src device="/dev/video0" ! video/x-raw,width=640,height=480 ! videoconvert ! x264enc tune=zerolatency ! rtph264pay ! udpsink host=127.0.0.1 port=5000
+
+H264 Receiver :
+gst-launch-1.0 udpsrc port=el_port  ! application/x-rtp,encoding-name=H264 ! rtpjitterbuffer latency=0 ! rtph264depay ! avdec_h264 ! videoconvert ! xvimagesink name=sink  force-aspect-ratio=false
+
+
+
+JPEG & H264 are both compression methods .
+JPEG pipeline sends frame by frame (whole frame is compressed to JPEG image and sent) 
+H264 pipeline sends a keyframe initially , and keeps sending just changes in frame , not new whole frames (it calculates the differences between pervious & current frame , and sends the difference) 
+
+This makes JPEG faster as comp in H264 takes the burden of encoding and decoding data and may not be able to cope with the stream
+but JPEG takes larger bandwidth
+
+
+"
+In our videostreaming setup between two hosts we already
+know what we need our pipeline to do. On the sending side
+we need to:
+1.
+acquire the video data
+2.
+compress the video data
+3.
+cut the data into smaller packets
+4.
+send the packets out through a network transport
+On the receiving side we than want to:
+1.
+receive the packets from the network transport
+2.
+reassemble the packets into video data
+3.
+decompress the video data
+4.
+display the video
+"
+
+
+
+
+sorce : https://mediatechnology.leiden.edu/images/uploads/docs/wt2014_gstreamer.pdf
