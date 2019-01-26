@@ -50,7 +50,6 @@ class ROV_19:
         self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.stream_IP ,self.stream_Ports )
 #        self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
         self.sensor = Sensor(1)
-        self.gpio= GPIO(self.Zero_Vertical,self.Motors_Frequency)
         self.Camera = Gstreamer(self.pipeline1)
 
 
@@ -58,8 +57,8 @@ class ROV_19:
         self.hat.add_Device('Right_Front', 5, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Back', 3,self.motion.Zero_thruster)
         self.hat.add_Device('Left_Back',9 , self.motion.Zero_thruster)
-#        self.hat.add_Device('Vertical_Right', 0, self.motion.Zero_thruster)
-#        self.hat.add_Device('Vertical_Left', 7, self.motion.Zero_thruster)
+        self.hat.add_Device('Vertical_Right', 0, self.motion.Zero_thruster)
+        self.hat.add_Device('Vertical_Left', 7, self.motion.Zero_thruster)
 #        self.hat.add_Device('Main_Cam',15,self.motion.Zero_Servo)
 #        self.hat.add_Device('light', 13, 0)
 
@@ -76,7 +75,6 @@ class ROV_19:
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
         self.observer_pattern.registerEventListener('SENSOR', self.sensor.update_pwm)
-        self.observer_pattern.registerEventListener("GPIO",self.gpio.update)
 #        self.observer_pattern.registerEventListener('CSV', self.udp_client.update)
 
 #        self.sensor.interrupt(self.observer_pattern.emit_Signal,'CSV')
@@ -93,7 +91,6 @@ class ROV_19:
             except KeyboardInterrupt:
                 print(' End')
                 self.tcp_server.close()
-                self.gpio.gpio_clean()
                 self.Camera.close()
                 return
 
