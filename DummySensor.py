@@ -1,5 +1,5 @@
 import threading
-class Dummy_Sensor:
+class Sensor:
     def __init__(self,time):
         self.pwm = 305
         self.pressure = 0
