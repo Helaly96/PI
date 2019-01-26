@@ -157,9 +157,9 @@ class Motion:
 
         pwm = {}
         pwm.update(self._horizontalMotors)
+        pwm.update(self._verticalMotors)
 #        pwm.update(self._servos)
 #        pwm.update(self._lights)
 
         self.emit_signal('HAT',pwm)
-        self.emit_signal("GPIO",self._verticalMotors["Vertical_Right"])
         self.print_PWM()
