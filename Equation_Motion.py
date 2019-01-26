@@ -101,15 +101,11 @@ class Motion:
 
         # print(pwm)
     def calculateVerticalMotors_19(self):
+        # steps = real pwm range / freq  = 250 M / 50 = 5 M (5000000)
         z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,self.Brake,self.Forward)
         self._verticalMotors['Vertical_Right'] = int(z)
         self._verticalMotors['Vertical_Left'] =  int(z)
-#     def moveCamera(self, camera:str , value:int):
-#         if value == 1 and self._servos[camera] < self.Servo_max  :
-#             self._servos[camera] += value
-#         elif value == -1 and self._servos[camera] < self.Servo_max:
-#             self._servos[camera] += value
-#         print(self._servos)
+
     def moveCamera(self):
         if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] < self.Servo_max  :
             self._servos['Main_Cam'] += 10
@@ -161,10 +157,9 @@ class Motion:
 
         pwm = {}
         pwm.update(self._horizontalMotors)
-        pwm.update(self._verticalMotors)
 #        pwm.update(self._servos)
 #        pwm.update(self._lights)
 
-        self.emit_signal('PWM',pwm)
-
+        self.emit_signal('HAT',pwm)
+        self.emit_signal("GPIO",self._verticalMotors["Vertical_Right"])
         self.print_PWM()

@@ -56,14 +56,12 @@ class TCP :
         # =========================================================
 
     def _recv(self):
-        data=str()
-        try:
-            data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
-        except socket.error:
-            if not data:
-                self._stream_disconect = True
-                self._close()
-                return
+        data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
+
+        if not data: # disconnection return empty string ""
+            self._stream_disconect = True
+            self.close()
+            return
 
         Qt_string = str()
         try:

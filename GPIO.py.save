@@ -1,5 +1,6 @@
-#import pigpio
-#pi = pigpio.pi()
+#
+import pigpio
+pi = pigpio.pi()
 
 class GPIO:
     def __init__(self,Zero,frequency):
@@ -14,12 +15,10 @@ class GPIO:
     def update(self,event,pwm):
         if event == "GPIO":
             self.pwm = pwm
-        #    print(self.pwm)
-        # pi.hardware_PWM(18, self.frequancy, self.pwm)
+            pi.hardware_PWM(18, self.frequancy, self.pwm)
+            print(self.pwm)
 
     def gpio_clean(self):
-        self.pwm=0
-         # pi.hardware_PWM(18, self.frequancy, 0)
-         # pi.stop()
-        print ("clean gpio")
+        pi.hardware_PWM(18, self.frequancy, 0)
+        pi.stop()
 
