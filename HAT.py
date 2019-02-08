@@ -35,6 +35,6 @@ class Hat:
 
     def update(self, event_name,pwm):
 
-        if event_name == "PWM":
+        if event_name == "HAT":
             self._updatePWM(pwm)
             self.emit_signal("SENSOR",pwm['Vertical_Right'])
