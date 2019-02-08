@@ -18,4 +18,4 @@ class Sensor:
     def update_pwm(self,event,z:int):
         if event == "SENSOR":
             self.pwm = z
-            print(self.pwm)
+#            print("Sensor: ",self.pwm)

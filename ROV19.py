@@ -8,7 +8,6 @@ from UDP import *
 # from HAT import *
 from DummySensor import *
 from DummyHat import *
-from DummyGPIO import *
 import selectors
 
 class ROV_19:
@@ -21,9 +20,8 @@ class ROV_19:
 
         # For Local
         self.RaspberryPi_IP = '127.0.0.1'
-        self.Qt_IP = '127.0.0.1'
+        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
-        self.stream_IP = '127.0.0.1' # sink ( Laptop's address )
         self.Port = 9005
         self.stream_Ports = ['5022','1234','']
         self.UDP_IP = "10.0.1.54"
@@ -32,11 +30,11 @@ class ROV_19:
         self.Motors_Frequency = 50
         self.Zero_Vertical = 305
 
-        self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.stream_IP + " port=" + self.stream_Ports[0]
-        self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self.stream_IP + ":" +self.stream_Ports[0] + "," + self.stream_IP + ":" + self.stream_Ports[1]
+        self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0]
+        self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[0] + "," + self.Laptop_IP + ":" + self.stream_Ports[1]
         # for Laptop's Camera
-        # self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022"
-        # self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
+        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022"
+        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
 
         # Qt String .. x=0,y=100,r=0,z=0,Cam_H_Servo=0,Cam_V_Servo=0,Back_Cam=0,light=0,
         # Qt String .. x=0,y=100,r=0,z=0,cam=0,light=0,
@@ -47,7 +45,7 @@ class ROV_19:
         self.observer_pattern = Observer_Pattern()
         self.hat = Hat( self.Hat_address, self.Motors_Frequency)
         self.motion = Motion()
-        self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.stream_IP ,self.stream_Ports )
+        self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP ,self.stream_Ports )
 #        self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
         self.sensor = Sensor(1)
         self.Camera = Gstreamer(self.pipeline1)
