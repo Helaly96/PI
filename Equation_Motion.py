@@ -129,8 +129,8 @@ class Motion:
         if event_name == 'TCP_ERROR' :
             self._stopVerticalMotors()
             self._stopHorizontalMotors()
- #           self._setCamToNormalPosition()
- #           self._turnLightOff()
+            self._setCamToNormalPosition()
+            self._turnLightOff()
             print('TCP_ERROR 8adaro beena')
 
         elif event_name == 'TCP':
@@ -150,16 +150,16 @@ class Motion:
 #             if self._Qt_String['Back_Cam'] !=0 :
 #                 self.moveCamera('Back_Cam',self._Qt_String['Back_Cam'])
 
-#            if self._Qt_String['cam'] != 0:
-#                 self.moveCamera()
-#            if self._Qt_String['light'] !=0:
-#                 self.light()
+            if self._Qt_String['cam'] != 0:
+                 self.moveCamera()
+            if self._Qt_String['light'] !=0:
+                 self.light()
 
         pwm = {}
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
-#        pwm.update(self._servos)
-#        pwm.update(self._lights)
+        pwm.update(self._servos)
+        pwm.update(self._lights)
 
         self.emit_signal('HAT',pwm)
         self.print_PWM()
