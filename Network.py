@@ -33,8 +33,10 @@ class TCP :
             self._socket.listen(1)
         except socket.error:
             print('socket error while binding socket')
-            self._port = int(input('port: '))
-            self._bind_Listen()
+            print("sh5al 5las")
+#            self._port = int(input('port: '))
+#            self._bind_Listen()
+            quit()
             return
 
         self._socket.setblocking(False)

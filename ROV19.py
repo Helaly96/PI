@@ -42,13 +42,13 @@ class ROV_19:
 
         self.selector =selectors.DefaultSelector()
 
+        self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP ,self.stream_Ports )
         self.observer_pattern = Observer_Pattern()
         self.hat = Hat( self.Hat_address, self.Motors_Frequency)
         self.motion = Motion()
-        self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP ,self.stream_Ports )
         self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
         self.sensor = Sensor(1)
-#        self.Camera = Gstreamer(self.pipeline1)
+        #self.Camera = Gstreamer(self.pipeline1)
 
         self.hat.add_Device('Left_Front', 11, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Front', 5, self.motion.Zero_thruster)
@@ -90,10 +90,5 @@ class ROV_19:
                 self.tcp_server.close()
 #                self.Camera.close()
                 return
-
-
-
-
-
 
 Scarrlet = ROV_19()
