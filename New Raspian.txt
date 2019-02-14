@@ -25,7 +25,7 @@ git clone https://github.com/adafruit/Adafruit_Python_PCA9685.git
 cd Adafruit_Python_PCA9685
 sudo python3 setup.py install
 
-=========== Static IP ===========================
+=========== Static IP  etc/network /interfaces ===================
 auto eth0
 iface eth0 inet static
         address 1.1.1.1
@@ -41,7 +41,7 @@ iface wlan0 inet dhcp
 wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
 iface default inet dhcp
 
-=========== Network Configration ================
+=========== Network Configration /etc/wpa_supplicant================
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=EG
