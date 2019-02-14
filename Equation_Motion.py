@@ -5,12 +5,12 @@ class Motion:
         self.emit_signal = None
         self._Qt_String = None
         # =========== Constants ===========
-        self.Zero_thruster = 305
+        self.Zero_thruster = 400
         self.Zero_Servo = 225
         self.Servo_min = 150
         self.Servo_max = 600
-        self.Brake = 225
-        self.Forward = 387
+        self.Brake = 330
+        self.Forward = 500
         self.Joystick_min = -100
         self.Joystick_max = 100
         self.Rotation_Efficiency = 0.231
