@@ -86,7 +86,7 @@ class ROV_19:
                 for key, mask in events:
                     key.data()
             except KeyboardInterrupt:
-                print(' End')
+                print(' Tari2 El Salama Enta')
                 self.tcp_server.close()
 #                self.Camera.close()
                 return
