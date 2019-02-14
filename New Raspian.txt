@@ -1,0 +1,53 @@
+New Raspbian
+
+sudo raspi-config # Expand file system(root)
+sudo apt-get update & upgrade
+
+============= Gstreamer =======================
+sudo apt-get install gstreamer1.0-tools \
+ gstreamer1.0-plugins-base \
+ gstreamer1.0-plugins-good \
+ gstreamer1.0-plugins-bad \
+ gstreamer1.0-plugins-ugly
+
+==== Hardware Accelerator =========
+sudo apt-get install gstreamer1.0-vaapi
+
+================= important ===================
+sudo apt-get install git build-essential python3-dev
+sudo apt-get install python3-smbus
+sudo apt-get install i2c-tools
+sudo apt-get install python3-gi python3-gi-cairo
+sudo apt-get install python3-gst-1.0
+
+========== Adafruit PCA9685 ====================
+git clone https://github.com/adafruit/Adafruit_Python_PCA9685.git
+cd Adafruit_Python_PCA9685
+sudo python3 setup.py install
+
+=========== Static IP ===========================
+auto eth0
+iface eth0 inet static
+        address 1.1.1.1
+        netmask 255.255.255.0
+        getway 1.1.1.2
+
+auto lo
+iface lo inet loopback
+
+auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+iface default inet dhcp
+
+=========== Network Configration ================
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=EG
+
+network={
+        ssid="Name of Wifi"
+        psk="password of Wifi"
+        key_mgmt=WPA-PSK
+}
