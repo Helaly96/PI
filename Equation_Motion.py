@@ -9,12 +9,13 @@ class Motion:
         self.Zero_Servo = 225
         self.Servo_min = 150
         self.Servo_max = 600
-        self.Brake = 330
+        self.Brake = 350
         self.Forward = 500
         self.Joystick_min = -100
         self.Joystick_max = 100
         self.Rotation_Efficiency = 0.231
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
+        self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
         # =========== Motors ==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -23,8 +24,8 @@ class Motion:
         # ======= initialization ===========
         self._stopHorizontalMotors()
         self._stopVerticalMotors()
-#        self._setCamToNormalPosition()
-#        self._turnLightOff()
+        self._setCamToNormalPosition()
+        self._turnLightOff()
         # ==================================
 
     def _stopHorizontalMotors(self):
@@ -39,7 +40,17 @@ class Motion:
         self._servos['Main_Cam'] = self.Zero_Servo
     def _turnLightOff(self):
         self._lights['light'] = 0
-
+    def Map (self,x,motor):
+        if x <= 0 :
+            return self.Zero_thruster + x * self.PWM_Map_Coff_reverse
+        elif motor == "Left_Front" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff
+        elif motor == "Right_Front" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff * 0.8
+        elif motor == "Right_Back" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff
+        elif motor == "Left_Back" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff        
     @staticmethod
     def map(value, leftMin, leftMax, rightMin, rightMax):
         leftSpan = leftMax - leftMin
@@ -94,10 +105,10 @@ class Motion:
 
         # Map the Joystick Coordinates to PWM Coordinates
 
-        self._horizontalMotors['Left_Front']  = int(self.Zero_thruster + Motor1 * self.PWM_Map_Coff)
-        self._horizontalMotors['Right_Front'] = int(self.Zero_thruster + Motor2 * self.PWM_Map_Coff)
-        self._horizontalMotors['Right_Back']  = int(self.Zero_thruster + Motor3 * self.PWM_Map_Coff)
-        self._horizontalMotors['Left_Back']  = int(self.Zero_thruster + Motor4 * self.PWM_Map_Coff)
+        self._horizontalMotors['Left_Front']  = int(self.Map(Motor1,'Left_Front') )
+        self._horizontalMotors['Right_Front'] = int(self.Map(Motor2,'Right_Front') )
+        self._horizontalMotors['Right_Back']  = int(self.Map(Motor3,'Right_Back') )
+        self._horizontalMotors['Left_Back']  = int(self.Map(Motor4,'Left_Back') )
 
         # print(pwm)
     def calculateVerticalMotors_19(self):
@@ -159,7 +170,7 @@ class Motion:
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
         pwm.update(self._servos)
-        pwm.update(self._lights)
+#        pwm.update(self._lights)
 
         self.emit_signal('HAT',pwm)
         self.print_PWM()
