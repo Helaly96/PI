@@ -5,12 +5,12 @@ class Motion:
         self.emit_signal = None
         self._Qt_String = None
         # =========== Constants ===========
-        self.Zero_thruster = 305
+        self.Zero_thruster = 400
         self.Zero_Servo = 225
         self.Servo_min = 150
         self.Servo_max = 600
-        self.Brake = 225
-        self.Forward = 387
+        self.Brake = 360
+        self.Forward = 440
         self.Joystick_min = -100
         self.Joystick_max = 100
         self.Rotation_Efficiency = 0.231
@@ -23,8 +23,8 @@ class Motion:
         # ======= initialization ===========
         self._stopHorizontalMotors()
         self._stopVerticalMotors()
-#        self._setCamToNormalPosition()
-#        self._turnLightOff()
+        self._setCamToNormalPosition()
+        self._turnLightOff()
         # ==================================
 
     def _stopHorizontalMotors(self):
@@ -95,14 +95,14 @@ class Motion:
         # Map the Joystick Coordinates to PWM Coordinates
 
         self._horizontalMotors['Left_Front']  = int(self.Zero_thruster + Motor1 * self.PWM_Map_Coff)
-        self._horizontalMotors['Right_Front'] = int(self.Zero_thruster + Motor2 * self.PWM_Map_Coff)
+        self._horizontalMotors['Right_Front'] = int(self.Zero_thruster + Motor2 * self.PWM_Map_Coff* 0.8)
         self._horizontalMotors['Right_Back']  = int(self.Zero_thruster + Motor3 * self.PWM_Map_Coff)
         self._horizontalMotors['Left_Back']  = int(self.Zero_thruster + Motor4 * self.PWM_Map_Coff)
 
         # print(pwm)
     def calculateVerticalMotors_19(self):
         # steps = real pwm range / freq  = 250 M / 50 = 5 M (5000000)
-        z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,self.Brake,self.Forward)
+        z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,300,500)
         self._verticalMotors['Vertical_Right'] = int(z)
         self._verticalMotors['Vertical_Left'] =  int(z)
 
@@ -159,7 +159,8 @@ class Motion:
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
         pwm.update(self._servos)
-        pwm.update(self._lights)
+#        pwm.update(self._lights)
 
+        print(pwm)
         self.emit_signal('HAT',pwm)
         self.print_PWM()

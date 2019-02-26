@@ -1,7 +1,8 @@
 import selectors
 import socket
 import sys
-
+import subprocess
+import time
 class TCP :
     def __init__(self,selector,ip:str,port:int, streamingIP:str ,stream_ports:list):
         self._buffer_size = 1024
@@ -15,6 +16,8 @@ class TCP :
         self._emit_Signal = None
         self._stream_disconect = False
         self.Connected = True
+        self.false = 0 
+        self.file = open("file.txt",'w')
 
         self._selector = selector
         self._create_Socket()
@@ -91,7 +94,6 @@ class TCP :
         tokens = qt_string.split(',')
         # delete the last element (it is empty)
         del tokens[len(tokens) - 1]
-
         Qt_string = {}
         count = self.Num_Of_tokens
         if len(tokens) > count:
@@ -112,8 +114,17 @@ class TCP :
 
         return Qt_string
 
-    def update(self,event,pressure,pwm):
-        if (self.Connected):
-            self._socket.send((str(pressure)+" "+str(pwm)).encode())
+    def update(self,event,pressure):
+        if self._conn != None or self.false:
+            self.false = 1 
+            addr = "1.1.1.2"
+            response = subprocess.call(['ping','-c','3',addr])
+            self.file.write(str(response)+'\n')
+            if response != 0 :
+                self._emit_Signal('TCP_ERROR',{})
+                time.sleep(1)
+                print("el socket maat")
+                return 
 
+#            self._conn.send((str(pressure)).encode())
 

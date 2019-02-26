@@ -8,7 +8,7 @@ class Hat:
     # Set the Speed of All Motors
     def add_Device(self,name,channel,zero_value):
         self._devices[name] = {'channel':channel , 'zero':zero_value , 'current': zero_value}
-        print('device: ',self._devices[name],' added at channel',self._devices[name]['channel'])
+        print('device: ',name,self._devices[name],' added at channel',self._devices[name]['channel'])
 
     def getDeviceBaseValue(self,device_name):
         return self._devices[device_name]['zero']

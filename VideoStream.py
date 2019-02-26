@@ -11,8 +11,11 @@ class Gstreamer():
         self._pipeline = Gst.parse_launch(pipeline)
             # "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! udpsink host=" + self._ip + " port=" + self._port + "sync=false")
         self._thread = None
-        self.start()
-
+        try:
+            self.start()
+        except :
+            print("wasl el camera ya sa3eed")
+            return 
     def start(self):
         ret = self._pipeline.set_state(Gst.State.PLAYING)
         if ret == Gst.StateChangeReturn.FAILURE:

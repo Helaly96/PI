@@ -10,12 +10,12 @@ class Sensor:
 
     def interrupt(self, update, name):
         self.update_pressure()
-        update(name,self.pressure,self.pwm)
+        update(name,self.pressure)
         threading.Timer(self.time, self.interrupt, [update, name]).start()
 
     def update_pressure(self):
         self.pressure += 1
     def update_pwm(self,event,z:int):
-        if event == "SENSOR":
+#        if event == "SENSOR":
             self.pwm = z
 #            print("Sensor: ",self.pwm)
