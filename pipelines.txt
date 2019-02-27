@@ -54,3 +54,4 @@ display the video
 
 
 sorce : https://mediatechnology.leiden.edu/images/uploads/docs/wt2014_gstreamer.pdf
+https://hackaday.com/2017/09/12/video-streaming-like-your-raspberry-pi-depended-on-it/
