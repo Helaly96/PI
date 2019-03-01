@@ -9,7 +9,7 @@ class Sensor:
         self.emit_signal=Observer_Pattern_Signal
 
     def interrupt(self, update, name):
-        self.update_pressure()
+#        self.update_pressure()
         update(name,self.pressure)
         threading.Timer(self.time, self.interrupt, [update, name]).start()
 

@@ -28,8 +28,8 @@ class Hat:
     # pwms is a dict ======> {'Motor1' : value1 , 'Motor2 : value2 ,.... etc }
     def _updatePWM(self,pwms:dict):
         for device_name in self._devices:
-            if self._devices[device_name]['current'] == pwms[device_name]:
-                continue
+#            if self._devices[device_name]['current'] == pwms[device_name]:
+#                continue
             self._devices[device_name]['current'] =pwms[device_name]
             self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
         print(pwms)
@@ -37,4 +37,4 @@ class Hat:
 
         if event_name == "HAT":
             self._updatePWM(pwm)
-            self.emit_signal("SENSOR",pwm['Vertical_Right'])
+#            self.emit_signal("SENSOR",pwm['Vertical_Right'])

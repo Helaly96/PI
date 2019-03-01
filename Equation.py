@@ -1,25 +1,27 @@
+import time
 import math
 class Motion:
-    def __init__(self):
+    def __init__(self,Qt_String):
 
         self.emit_signal = None
-        self._Qt_String = None
+        self._Qt_String = Qt_String.copy()
         # =========== Constants ===========
         self.Zero_thruster = 400
         self.Zero_Servo = 225
         self.Servo_min = 150
-        self.Servo_max = 600
+        self.Servo_max = 395
         self.Brake = 350
-        self.Forward = 470
+        self.Forward = 440
         self.Joystick_min = -100
         self.Joystick_max = 100
-        self.Rotation_Efficiency = 0.5
+        self.Rotation_Efficiency = 0.45
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
         self.Zero_Magazie = 350
         self.CoffZ_reverse = 0.5
-        self.CoffZ = 0.7
- 
+        self.CoffZ = 0.85
+        self.camera_step = 10
+        self.delay = False 
         # =========== Motors==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -132,12 +134,12 @@ class Motion:
         self._verticalMotors['Vertical_Left'] =  int(z)
 
     def moveCamera(self):
-        if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] < self.Servo_max  :
-            self._servos['Main_Cam'] -= 10
-            self._servos['Back_Cam'] -= 10
-        elif self._Qt_String['cam'] == 4 and self._servos['Main_Cam'] > self.Servo_min:
-            self._servos['Main_Cam'] += 10
-            self._servos['Back_Cam'] += 10
+        if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] > self.Servo_min  :
+            self._servos['Main_Cam'] -= self.camera_step
+            self._servos['Back_Cam'] -= self.camera_step
+        elif self._Qt_String['cam'] == 4 and self._servos['Main_Cam'] < self.Servo_max:
+            self._servos['Main_Cam'] += self.camera_step
+            self._servos['Back_Cam'] += self.camera_step
         elif self._Qt_String['cam'] == 2:
             self._servos['Magazine_Servo'] = 100
         elif self._Qt_String['cam'] == 8:
@@ -170,6 +172,13 @@ class Motion:
             self.calculateVerticalMotors_19()
             self.calculateHorizontalMotors_19()
 
+            if self._Qt_String['cam'] != 0:
+                 self.moveCamera()
+                 self.delay = True
+            else :
+                 self._servos['Magazine_Servo'] = self.Zero_Magazie
+            if self._Qt_String['light'] !=0:
+                 self.light()
 
 #            if self._Qt_String['z'] !=0:
 #                self._stopHorizontalMotors()
@@ -177,20 +186,6 @@ class Motion:
 #            else:
 #                self._stopVerticalMotors()
 #                self.calculateHorizontalMotors_19()
-#
-#             if self._Qt_String['Cam_H_Servo'] != 0:
-#                 self.moveCamera('Cam_H_Servo',self._Qt_String['Cam_H_Servo'])
-#             if self._Qt_String['Cam_V_Servo'] != 0:
-#                 self.moveCamera('Cam_V_Servo',self._Qt_String['Cam_V_Servo'])
-#             if self._Qt_String['Back_Cam'] !=0 :
-#                 self.moveCamera('Back_Cam',self._Qt_String['Back_Cam'])
-
-        if self._Qt_String['cam'] != 0:
-                 self.moveCamera()
-        else :
-                 self._servos['Magazine_Servo'] = self.Zero_Magazie
-        if self._Qt_String['light'] !=0:
-                 self.light()
 
         pwm = {}
         pwm.update(self._horizontalMotors)
@@ -199,5 +194,8 @@ class Motion:
 #        pwm.update(self._lights)
 
         self.emit_signal('HAT',pwm)
+        if self.delay :
+            time.sleep(0.1) 
+        self.delay = False
 #        self.print_PWM()
 
