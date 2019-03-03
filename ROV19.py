@@ -53,12 +53,12 @@ class ROV_19:
         self.Camera2 = Gstreamer(self.pipeline2)
 
         self.hat.add_Device('Left_Front', 7, self.motion.Zero_thruster)
-        self.hat.add_Device('Right_Front', 0, 400)
+        self.hat.add_Device('Right_Front', 4, 400)
         self.hat.add_Device('Right_Back', 12,400)
         self.hat.add_Device('Left_Back',15 , 400)
         self.hat.add_Device('Vertical_Right', 8, 400)
         self.hat.add_Device('Vertical_Left', 10, 400)
-        self.hat.add_Device('Main_Cam',4,400)
+        self.hat.add_Device('Main_Cam',0,400)
         self.hat.add_Device('Back_Cam',2,400)
         self.hat.add_Device('Magazine_Servo',3,1450)
 

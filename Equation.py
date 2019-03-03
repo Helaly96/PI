@@ -9,7 +9,7 @@ class Motion:
         self.Zero_thruster = 400
         self.Zero_Servo = 225
         self.Servo_min = 150
-        self.Servo_max = 395
+        self.Servo_max = 570
         self.Brake = 350
         self.Forward = 440
         self.Joystick_min = -100
@@ -19,9 +19,9 @@ class Motion:
         self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
         self.Zero_Magazie = 350
         self.CoffZ_reverse = 0.5
-        self.CoffZ = 0.85
-        self.camera_step = 10
-        self.delay = False 
+        self.CoffZ = 0.9
+        self.camera_step = 5
+        self.delay = False
         # =========== Motors==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -58,9 +58,9 @@ class Motion:
         elif motor == "Left_Front" :
             return self.Zero_thruster + x * self.PWM_Map_Coff
         elif motor == "Right_Front" :
-            return self.Zero_thruster + x * self.PWM_Map_Coff * 0.8
+            return self.Zero_thruster + x * self.PWM_Map_Coff * 0.7
         elif motor == "Right_Back" :
-            return self.Zero_thruster + x * self.PWM_Map_Coff
+            return self.Zero_thruster + x * self.PWM_Map_Coff * 0.8
         elif motor == "Left_Back" :
             return self.Zero_thruster + x * self.PWM_Map_Coff
     @staticmethod
