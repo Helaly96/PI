@@ -29,11 +29,7 @@ class ROV_19:
         self.Motors_Frequency = 60
         self.Zero_Vertical = 400
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0,'light':0}
-<<<<<<< HEAD
-        self.hat_delay = 0.000020
-=======
         self.hat_delay = 0.000020 # us
->>>>>>> b856ab3bf883a5fe2ec800d9cbccdda40ee7d7b8
 
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0]
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] + "," + self.Laptop_IP + ":" + self.stream_Ports[2]
