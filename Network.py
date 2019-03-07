@@ -60,21 +60,17 @@ class TCP :
             self._stream_disconect = True
             self.close()
             return
-
-        Qt_string = str()
-        try:
-            Qt_string = self.Split_to_Dict(data)
-        except Exception as e:
-            print(e,'wrong msg in recv')
+        try: 
+            Qtstrings=self.Split_to_Dict(data)
+        except:
+            print("Msg 8areeebaa Moreebaaaa 3ageeebaa")
             return
-        if Qt_string == None:
-            return
-
-        if self._emit_Signal is None:
-            print("emit signal dose not exist")
+#        print(Qtstrings) 
+        if Qtstrings == None:
             return
 
-        self._emit_Signal("TCP",Qt_string)
+        for string in Qtstrings :
+            self._emit_Signal("TCP",string)
 
     def close(self):
         self._emit_Signal('TCP_ERROR',{})
@@ -84,29 +80,37 @@ class TCP :
         self._conn = None
 
     def Split_to_Dict(self,qt_string: str):
-        tokens = qt_string.split(',')
-        # delete the last element (it is empty)
-        del tokens[len(tokens) - 1]
-
-        Qt_string = {}
+        Qt_strings = []
         count = self.Num_Of_tokens
-        if len(tokens) > count:
-            tokens_clone = tokens
-            tokens = [""] * count
-            try:
-                for i in range(count):
-                    tokens[i] = tokens_clone[(len(tokens_clone) - count) + i]
-            except IndexError:
-                print("Rubbish Qt string")
-        elif len(tokens) < count:
+
+        msgs = qt_string.split('&')
+        n = len (msgs)
+        del msgs[ n -1 ]
+
+        if n == 1:
+            Qt_strings.append( {} )
+            msg = msgs[0].split(',')
+            for term in msg:
+                temp_list = term.split("=")
+                Qt_strings[0][temp_list[0]] = int(temp_list[1])
+            return Qt_strings
+
+        if n > 1 :
+            for msg in msgs :
+                temp_msg = msg.split(',')
+                temp_Qt_string = {}
+                for term in temp_msg:
+                    temp_list = term.split("=")
+                    temp_Qt_string[temp_list[0]] = int(temp_list[1])
+                Qt_strings.append(temp_Qt_string)
+#            print("Qt_strings:",Qt_strings)
+            return Qt_strings
+
+        elif n == 0:
             print('num of tokens error')
             return None
 
-        for term in tokens:
-            temp_list = term.split("=")
-            Qt_string[temp_list[0]] = int(temp_list[1])
-
-        return Qt_string
+        return Qt_strings
 
     def update(self,event,pressure):
         import subprocess

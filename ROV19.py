@@ -3,7 +3,7 @@ from Network import *
 from Equation import *
 from Observer_Pattern import *
 from UDP import *
-# from Sensor import *
+#from Sensor import *
 from HAT import *
 from DummySensor import *
 #from DummyHat import *
@@ -14,12 +14,12 @@ class ROV_19:
     def __init__(self):
         # ================= ROV System =========================
         # For PI 19
-        self.RaspberryPi_IP = '1.1.1.1'
-        self.Laptop_IP = '1.1.1.2'
+#        self.RaspberryPi_IP = '1.1.1.1'
+#        self.Laptop_IP = '1.1.1.2'
 
         # For Local
-        # self.RaspberryPi_IP = '127.0.0.1'
-        # self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+        self.RaspberryPi_IP = '127.0.0.1'
+        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
         self.Port = 9005
         self.stream_Ports = ['5022','5000','10000']
@@ -29,6 +29,7 @@ class ROV_19:
         self.Motors_Frequency = 60
         self.Zero_Vertical = 400
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0,'light':0}
+        self.hat_delay = 0.000020
 
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0]
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] + "," + self.Laptop_IP + ":" + self.stream_Ports[2]

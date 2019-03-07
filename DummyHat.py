@@ -26,7 +26,7 @@ class Hat:
             if self._devices[device_name]['current'] == pwms[device_name]:
                 continue
             self._devices[device_name]['current'] =pwms[device_name]
-        #print(pwms)
+        print(pwms)
 
     def update(self, event_name,pwm):
 
