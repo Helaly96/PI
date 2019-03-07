@@ -41,10 +41,10 @@ class TCP :
     def _acceept(self):
         # if someone tries to connect the pi while it is already connected
         if self._conn is not None:
-            # to pull the event from selectors
-            new_conn , new_addr = self._socket.accept()
-            new_conn.close()
-            print("something tries to connect to pi ")
+            self.close()
+            self._conn , self._client_address = self._socket.accept()
+            self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
+            print("D5ool Rayaaaaaaaaaaaaaaaaaa2")
             return
         # ===================== TCP Server ========================
         self._conn , self._client_address = self._socket.accept()
@@ -55,7 +55,7 @@ class TCP :
 
     def _recv(self):
         data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
-#        print(data)
+        print(data)
         if not data: # disconnection return empty string ""
             self._stream_disconect = True
             self.close()

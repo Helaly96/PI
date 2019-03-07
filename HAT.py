@@ -1,13 +1,13 @@
 import Adafruit_PCA9685
-
+import time 
 
 class Hat:
-    def __init__(self, address, frequency):
+    def __init__(self, address, frequency,delay):
         self.address = address
         self.frequency = frequency
         self._hat = Adafruit_PCA9685.PCA9685()
         self._hat.set_pwm_freq(frequency)
-
+        self.delay = delay
         self._devices = {}
         self.emit_signal =None
     # Set the Speed of All Motors
@@ -24,15 +24,22 @@ class Hat:
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
-
+#device_name == 'Vertical_Right' or device_name == 'Vertica_Left') and 
     # pwms is a dict ======> {'Motor1' : value1 , 'Motor2 : value2 ,.... etc }
     def _updatePWM(self,pwms:dict):
         for device_name in self._devices:
-#            if self._devices[device_name]['current'] == pwms[device_name]:
-#                continue
+            if (self._devices[device_name]['current'] != self._devices[device_name]['zero']) and (pwms[device_name] == self._devices[device_name]['zero']):
+                for i in range (5) :
+                     self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['zero']) )
+#                     time.sleep(0.020)
+#            print ("Meaw")
+
+            if (self._devices[device_name]['current'] == pwms[device_name]) :
+                continue
             self._devices[device_name]['current'] =pwms[device_name]
             self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
-        print(pwms)
+            time.sleep(self.delay)
+#        print(pwms)
     def update(self, event_name,pwm):
 
         if event_name == "HAT":

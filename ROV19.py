@@ -29,6 +29,7 @@ class ROV_19:
         self.Motors_Frequency = 60
         self.Zero_Vertical = 400
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0,'light':0}
+        self.hat_delay = 0.000020 # us
 
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0]
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] + "," + self.Laptop_IP + ":" + self.stream_Ports[2]
@@ -45,7 +46,7 @@ class ROV_19:
 
         self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP ,self.stream_Ports )
         self.observer_pattern = Observer_Pattern()
-        self.hat = Hat( self.Hat_address, self.Motors_Frequency)
+        self.hat = Hat( self.Hat_address, self.Motors_Frequency,self.hat_delay)
         self.motion = Motion(self.Qt_String)
         self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
         self.sensor = Sensor(1.1)

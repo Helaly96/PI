@@ -11,7 +11,7 @@ class Motion:
         self.Servo_min = 150
         self.Servo_max = 570
         self.Brake = 350
-        self.Forward = 440
+        self.Forward = 470
         self.Joystick_min = -100
         self.Joystick_max = 100
         self.Rotation_Efficiency = 0.45
