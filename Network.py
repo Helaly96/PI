@@ -24,6 +24,10 @@ class TCP :
     def _create_Socket(self):
         self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 2)
 
     def _bind_Listen(self):
         try:
