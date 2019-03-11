@@ -1,6 +1,6 @@
 
 class Hat:
-    def __init__(self, address, frequency):
+    def __init__(self, address, frequency,delay):
         self.address = address
         self.frequency = frequency
         self.emit_signal = None
@@ -8,14 +8,7 @@ class Hat:
     # Set the Speed of All Motors
     def add_Device(self,name,channel,zero_value):
         self._devices[name] = {'channel':channel , 'zero':zero_value , 'current': zero_value}
-        print('device: ',name,self._devices[name],' added at channel',self._devices[name]['channel'])
-
-    def getDeviceBaseValue(self,device_name):
-        return self._devices[device_name]['zero']
-    def getDeviceValue(self,device_name):
-        return self._devices[device_name]['current']
-    def setDeviceValue(self, device_name,value):
-        self._devices[device_name]['current'] = value
+        print('device: ',name,self._devices[name])
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
@@ -26,7 +19,7 @@ class Hat:
             if self._devices[device_name]['current'] == pwms[device_name]:
                 continue
             self._devices[device_name]['current'] =pwms[device_name]
-        print(pwms)
+#        print(pwms)
 
     def update(self, event_name,pwm):
 

@@ -1,5 +1,5 @@
 import Adafruit_PCA9685
-import time 
+import time
 
 class Hat:
     def __init__(self, address, frequency,delay):
@@ -28,16 +28,18 @@ class Hat:
     # pwms is a dict ======> {'Motor1' : value1 , 'Motor2 : value2 ,.... etc }
     def _updatePWM(self,pwms:dict):
         for device_name in self._devices:
+            # ======================== Check for Sudden Change =======================
             if( device_name == "Vertical_Right" or device_name == "Vertica_Left") and self._devices[device_name]['current'] != self._devices[device_name]['zero']
             and pwms[device_name] == self._devices[device_name]['zero']:
                 for i in range 5 :
                     self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['zero'])
-                    print("Meaw") 
+            # ========================================================================
+
             if self._devices[device_name]['current'] == pwms[device_name]:
                 continue
             self._devices[device_name]['current'] =pwms[device_name]
             self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
-#            time.sleep(self.delay)
+            time.sleep(self.delay)
         print(pwms)
             if (self._devices[device_name]['current'] != self._devices[device_name]['zero']) and (pwms[device_name] == self._devices[device_name]['zero']):
                 for i in range (5) :

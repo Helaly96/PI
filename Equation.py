@@ -155,7 +155,7 @@ class Motion:
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
     def print_PWM(self):
-        print(self._horizontalMotors,self._verticalMotors,self._servos)
+        print(self._horizontalMotors,self._verticalMotors)
 
     def update(self,event_name,Qt_String):
 
@@ -191,11 +191,10 @@ class Motion:
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
         pwm.update(self._servos)
-#        pwm.update(self._lights)
 
         self.emit_signal('HAT',pwm)
         if self.delay :
             time.sleep(0.1) 
         self.delay = False
-#        self.print_PWM()
+        self.print_PWM()
 

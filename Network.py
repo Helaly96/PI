@@ -18,12 +18,17 @@ class TCP :
         self._create_Socket()
         self._bind_Listen()
 
+        print(self._selector)
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self._emit_Signal=Observer_Pattern_Signal
 
     def _create_Socket(self):
         self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 2)
 
     def _bind_Listen(self):
         try:
@@ -41,26 +46,33 @@ class TCP :
     def _acceept(self):
         # if someone tries to connect the pi while it is already connected
         if self._conn is not None:
-            self.close()
-            self._conn , self._client_address = self._socket.accept()
-            self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
-            print("D5ool Rayaaaaaaaaaaaaaaaaaa2")
+            print("ay 7aga")
+            # self.close()
+            # self._conn , self._client_address = self._socket.accept()
+            # self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
+            # print("D5ool Rayaaaaaaaaaaaaaaaaaa2")
             return
         # ===================== TCP Server ========================
         self._conn , self._client_address = self._socket.accept()
         print('Connected ya ray2      ',self._client_address)
+
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
+        self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 2)
+
         self._conn.setblocking(False)
         self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
         # =========================================================
 
     def _recv(self):
         data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
-        print(data)
+#        print(data)
         if not data: # disconnection return empty string ""
             self._stream_disconect = True
             self.close()
             return
-        try: 
+        try:
             Qtstrings=self.Split_to_Dict(data)
         except:
             print("Msg 8areeebaa Moreebaaaa 3ageeebaa")
@@ -77,11 +89,12 @@ class TCP :
         if self._conn is not None:
             self._selector.unregister(self._conn)
             self._conn.close()
-        self._conn = None
+            self._conn = None
 
     def Split_to_Dict(self,qt_string: str):
         Qt_strings = []
         count = self.Num_Of_tokens
+
 
         msgs = qt_string.split('&')
         n = len (msgs)
@@ -112,9 +125,12 @@ class TCP :
 
         return Qt_strings
 
-    def update(self,event,pressure):
-        import subprocess
-        address = "1.1.1.2"
-        res = subprocess.call(['ping', '-w', '1', address])
-        if res!= 0:
-            self._emit_Signal("TCP_ERROR",{}) 
+    def hard_Shutdown_Recreate_Socket(self):
+        self.close()
+        self._selector.unregister(self._socket)
+        self._socket.close()
+        self._socket = None
+        print("Socket is Dead Tari2 El Salama enta")
+        self._create_Socket()
+        self._bind_Listen()
+        print("New Socket Created ...............")
