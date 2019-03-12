@@ -9,6 +9,7 @@ class TCP :
         self._port = port
         self._streamIP = streamingIP
         self._streaming_ports = stream_ports.copy()
+        self._socket = None
         self._conn = None
         self._client_address = None
         self._emit_Signal = None
@@ -30,6 +31,10 @@ class TCP :
         self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 1)
         self._socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 2)
 
+    def get_socket(self):
+        return self._socket
+    def get_conn(self):
+        return self._conn
     def _bind_Listen(self):
         try:
             self._socket.bind( (self._ip,self._port) )
@@ -46,11 +51,17 @@ class TCP :
     def _acceept(self):
         # if someone tries to connect the pi while it is already connected
         if self._conn is not None:
-            print("ay 7aga")
+            print("someone tries to connect pi")
+
+            # ========== Close The old and open new Connection ===============================
             # self.close()
             # self._conn , self._client_address = self._socket.accept()
             # self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
             # print("D5ool Rayaaaaaaaaaaaaaaaaaa2")
+
+            # =========== Pull the Event from Selectors and close it and keep the old =========
+            temp_conn , _ = self._socket.accept()
+            temp_conn.close()
             return
         # ===================== TCP Server ========================
         self._conn , self._client_address = self._socket.accept()
@@ -128,6 +139,7 @@ class TCP :
     def hard_Shutdown_Recreate_Socket(self):
         self.close()
         self._selector.unregister(self._socket)
+        self._socket.shutdown()
         self._socket.close()
         self._socket = None
         print("Socket is Dead Tari2 El Salama enta")

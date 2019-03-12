@@ -46,7 +46,7 @@ class ROV_19:
         # ========================================================
 
         self.selector =selectors.DefaultSelector()
-        print(self.selector)
+
         self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP ,self.stream_Ports )
         self.observer_pattern = Observer_Pattern()
         self.hat = Hat( self.Hat_address, self.Motors_Frequency,self.hat_delay)
@@ -76,16 +76,24 @@ class ROV_19:
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
 
-#        self.sensor.interrupt(self.observer_pattern.emit_Signal,'Sensor')
-
         self.main_Loop()
+
+    def selector_print(self):
+        conn = self.tcp_server.get_conn()
+        sock = self.tcp_server.get_socket()
+        if conn != None :
+            print(self.selector.get_key(conn)[3],end=" $ ")
+        if sock != None:
+            print(self.selector.get_key(sock)[3])
+
 
     def main_Loop(self):
         print('Wait for zeft Qt')
         while True:
             try:
-                events = self.selector.select()
-#                print("ray2")
+                events = self.selector.select(3)
+
+                self.selector_print()
                 for key, mask in events:
                     key.data()
 

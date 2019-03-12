@@ -1,4 +1,3 @@
-
 class Hat:
     def __init__(self, address, frequency,delay):
         self.address = address
@@ -26,4 +25,3 @@ class Hat:
         if event_name == "HAT":
             self._updatePWM(pwm)
 #            self.emit_signal("SENSOR",pwm['Vertical_Right'])
-
