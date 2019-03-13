@@ -5,9 +5,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-#from HAT import *
+from HAT import *
 from DummySensor import *
-from DummyHat import *
+#from DummyHat import *
 import selectors
 import select
 
