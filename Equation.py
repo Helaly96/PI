@@ -19,8 +19,8 @@ class Motion:
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
         self.Zero_Magazie = 350
-        self.CoffZ_reverse = 0.5
-        self.CoffZ = 0.9
+        self.CoffZ_reverse = 0.7
+        self.CoffZ = 1
         self.camera_step = 5
         self.delay = False
         # =========== Motors==============
@@ -196,8 +196,8 @@ class Motion:
         pwm.update(self._servos)
 
         self.emit_signal('HAT',pwm)
-        if self.delay :
-            time.sleep(0.1) 
-        self.delay = False
-        self.print_PWM()
+#        if self.delay :
+#            time.sleep(0.1) 
+#        self.delay = False
+#        self.print_PWM()
 

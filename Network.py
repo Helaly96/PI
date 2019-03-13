@@ -139,7 +139,7 @@ class TCP :
     def hard_Shutdown_Recreate_Socket(self):
         self.close()
         self._selector.unregister(self._socket)
-        self._socket.shutdown()
+        self._socket.shutdown(2)
         self._socket.close()
         self._socket = None
         print("Socket is Dead Tari2 El Salama enta")

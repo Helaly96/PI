@@ -30,7 +30,7 @@ class ROV_19:
         self.UDP_IP = self.Laptop_IP
         self.UDP_Port = 8005
         self.Hat_address = 0x40
-        self.Motors_Frequency = 60
+        self.Motors_Frequency = 50
         self.Zero_Vertical = 400
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0,'light':0}
         self.hat_delay = 0.000020 # us
