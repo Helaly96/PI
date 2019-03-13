@@ -76,9 +76,6 @@ class ROV_19:
         self.observer_pattern.registerEventListener('HAT', self.hat.update)
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
-        self.observer_pattern.registerEventListener('HATs', self.hat.update)
-
-        self.timer.start(self.observer_pattern.emit_Signal,"HATs",5)
 
         self.main_Loop()
 
@@ -95,7 +92,7 @@ class ROV_19:
         print('Wait for zeft Qt')
         while True:
             try:
-                events = self.selector.select(3)
+                events = self.selector.select(2)
 
                 self.selector_print()
                 for key, mask in events:
