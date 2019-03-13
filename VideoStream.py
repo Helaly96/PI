@@ -1,5 +1,3 @@
-import threading
-import time
 import gi
 
 gi.require_version('Gst', '1.0')
@@ -10,12 +8,11 @@ class Gstreamer():
         Gst.init(None)
         self._pipeline = Gst.parse_launch(pipeline)
             # "v4l2src device=/dev/video0 ! image/jpeg, width=1280, height=720, framerate=60/1 ! rtpjpegpay ! udpsink host=" + self._ip + " port=" + self._port + "sync=false")
-        self._thread = None
         try:
             self.start()
         except :
             print("wasl el camera ya sa3eed")
-            return 
+            return
     def start(self):
         ret = self._pipeline.set_state(Gst.State.PLAYING)
         if ret == Gst.StateChangeReturn.FAILURE:
@@ -23,7 +20,7 @@ class Gstreamer():
         print("start")
     def pause(self):
         self._pipeline.set_state(Gst.State.PAUSED)
-
+        print("Pause Camera")
     def close(self):
         self._running = False
         self._pipeline.set_state(Gst.State.NULL)
