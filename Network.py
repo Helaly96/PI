@@ -2,13 +2,13 @@ import selectors
 import socket
 
 class TCP :
-    def __init__(self,selector,ip:str,port:int, streamingIP:str ,stream_ports:list):
+    def __init__(self,selector,ip:str,port:int, streamingIP:str,Type:str ):
+        self.Type=Type
         self._buffer_size = 1024
         self.Num_Of_tokens = 6
         self._ip = ip
         self._port = port
         self._streamIP = streamingIP
-        self._streaming_ports = stream_ports.copy()
         self._socket = None
         self._conn = None
         self._client_address = None
@@ -51,8 +51,11 @@ class TCP :
     def _acceept(self):
         # if someone tries to connect the pi while it is already connected
         if self._conn is not None:
-            print("someone tries to connect pi")
 
+            if self.Type == "QT":
+                print("someone tries to connect pi")
+            elif self.Type == "Autonomus":
+                print ("socket el Autonomus maftoo7")
             # ========== Close The old and open new Connection ===============================
             # self.close()
             # self._conn , self._client_address = self._socket.accept()
@@ -80,9 +83,13 @@ class TCP :
         data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
 #        print(data)
         if not data: # disconnection return empty string ""
-            self._stream_disconect = True
             self.close()
             return
+
+        if self.Type == "Autonomus":
+            self._emit_Signal('AUTONOMUS',data)
+            return
+
         try:
             Qtstrings=self.Split_to_Dict(data)
         except:

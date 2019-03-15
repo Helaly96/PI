@@ -24,4 +24,17 @@ class Hat:
 
         if event_name == "HAT":
             self._updatePWM(pwm)
-#            self.emit_signal("SENSOR",pwm['Vertical_Right'])
+        if event_name == "PID":
+            self.Autonomus(pwm)
+
+    def Autonomus(self,dir:str):
+        pwm = {'Left_Front':305,'Right_Front':305,'Right_Back':305,'Left_Back':305,'Vertical_Right':305,'Vertical_Left':305}
+        if dir == "left":
+            pass
+        elif dir == "right":
+            pass
+        elif dir == "up":
+            pass
+        elif dir == "down":
+            pass
+        self._updatePWM(pwm)
