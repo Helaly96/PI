@@ -11,14 +11,15 @@ class Hat:
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
-
+    def Raspberry_pi_Power(self,channel,value):
+        pass
     # pwms is a dict ======> {'Motor1' : value1 , 'Motor2 : value2 ,.... etc }
     def _updatePWM(self,pwms:dict):
         for device_name in self._devices:
             if self._devices[device_name]['current'] == pwms[device_name]:
                 continue
             self._devices[device_name]['current'] =pwms[device_name]
-#        print(pwms)
+        print(pwms)
 
     def update(self, event_name,pwm):
 

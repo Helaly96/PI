@@ -1,4 +1,4 @@
-from PID import *
+#from PID import *
 from Timer import *
 from VideoStream import *
 from Network import *
@@ -6,9 +6,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-from HAT import *
+#from HAT import *
 from DummySensor import *
-#from DummyHat import *
+from DummyHat import *
 import selectors
 import select
 
@@ -18,12 +18,12 @@ class ROV_19:
     def __init__(self):
         # ================= ROV System =========================
         # For PI 19
-        self.RaspberryPi_IP = '10.1.1.15'
-        self.Laptop_IP = '10.1.1.14'
+#        self.RaspberryPi_IP = '10.1.1.15'
+#        self.Laptop_IP = '10.1.1.14'
 
         # For Local
-#        self.RaspberryPi_IP = '127.0.0.1'
-#        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+        self.RaspberryPi_IP = '127.0.0.1'
+        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
 
         self.Port = 9005
@@ -40,22 +40,21 @@ class ROV_19:
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port:" +self.stream_Ports[1]
         # for Laptop's Camera
-#        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
-#        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
+        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
+        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
 
         # Qt String .. x=0,y=100,r=0,z=0,cam=0,light=0,
         # ========================================================
 
         self.selector =selectors.DefaultSelector()
 
-        self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP , "QT")
-        self.tcp_autonomus = TCP(self.selector,self.RaspberryPi_IP,self.Autonomus_Port,self.Laptop_IP,"Autonomus")
+        self.tcp_server = TCP(self.selector,self.RaspberryPi_IP, self.Port, self.Laptop_IP )
 
         self.observer_pattern = Observer_Pattern()
         self.hat = Hat( self.Hat_address, self.Motors_Frequency,self.hat_delay)
         self.motion = Motion(self.Qt_String)
         self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
-        self.pid=PID()
+#        self.pid=PID()
 
         self.timer = Timer(1)
         self.Camera = Gstreamer(self.pipeline1)
@@ -75,13 +74,12 @@ class ROV_19:
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.hat.SIGNAL_Referance(self.observer_pattern.emit_Signal)
-        self.tcp_autonomus.SIGNAL_Referance(self.observer_pattern.emit_Signal)
 
         self.observer_pattern.registerEventListener('HAT', self.hat.update)
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
-        self.observer_pattern.registerEventListener('AUTONOMUS',self.pid.update)
-        self.observer_pattern.registerEventListener('PID',self.hat.update)
+        # self.observer_pattern.registerEventListener('AUTONOMUS',self.pid.update)
+        # self.observer_pattern.registerEventListener('PID',self.hat.update)
 
         self.main_Loop()
 
@@ -106,11 +104,9 @@ class ROV_19:
 
             except TimeoutError:
                 self.tcp_server.hard_Shutdown_Recreate_Socket()
-                self.tcp_autonomus.hard_Shutdown_Recreate_Socket()
             except KeyboardInterrupt:
                 print(' Tari2 El Salama Enta')
                 self.tcp_server.close()
-                self.tcp_autonomus.close()
                 self.selector.close()
                 self.Camera.close()
                 self.Camera2.close()

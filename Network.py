@@ -2,8 +2,8 @@ import selectors
 import socket
 
 class TCP :
-    def __init__(self,selector,ip:str,port:int, streamingIP:str,Type:str ):
-        self.Type=Type
+    def __init__(self,selector,ip:str,port:int, streamingIP:str ):
+#        self.Type=Type
         self._buffer_size = 1024
         self.Num_Of_tokens = 6
         self._ip = ip
@@ -54,8 +54,6 @@ class TCP :
 
             if self.Type == "QT":
                 print("someone tries to connect pi")
-            elif self.Type == "Autonomus":
-                print ("socket el Autonomus maftoo7")
             # ========== Close The old and open new Connection ===============================
             # self.close()
             # self._conn , self._client_address = self._socket.accept()
@@ -86,9 +84,6 @@ class TCP :
             self.close()
             return
 
-        if self.Type == "Autonomus":
-            self._emit_Signal('AUTONOMUS',data)
-            return
 
         try:
             Qtstrings=self.Split_to_Dict(data)

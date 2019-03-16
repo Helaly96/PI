@@ -49,8 +49,8 @@ class Hat:
 
         if event_name == "HAT":
             self._updatePWM(pwm)
-        if event_name == "PID":
-            self.Autonomus(pwm)
+#        if event_name == "PID":
+#            self.Autonomus(pwm)
 
     def Autonomus(self,dir:str):
         pwm = {'Left_Front':305,'Right_Front':305,'Right_Back':305,'Left_Back':305,'Vertical_Right':305,'Vertical_Left':305}
