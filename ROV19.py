@@ -6,9 +6,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-#from HAT import *
+from HAT import *
 from DummySensor import *
-from DummyHat import *
+#from DummyHat import *
 import selectors
 import select
 
@@ -40,8 +40,8 @@ class ROV_19:
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port:" +self.stream_Ports[1]
         # for Laptop's Camera
-        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
-        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
+#        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
+#        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
 
         # Qt String .. x=0,y=100,r=0,z=0,cam=0,light=0,
         # ========================================================

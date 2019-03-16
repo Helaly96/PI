@@ -1,32 +1,7 @@
 import time
-import sys
 import ms5837
 import Adafruit_PCA9685
 
-p = 250
-i = 53
-d = 35
-
-sample_time = 0.01  # seconds
-depth = 0.0
-setpoint = 0.7
-sensor_offset = 0.0 # meter
-
-sensor = ms5837.MS5837_30BA()
-sensor.setFluidDensity(1000) # kg/m^3
-
-pwm_zero = 305
-
-pwm = Adafruit_PCA9685.PCA9685()
-pwm.set_pwm_freq(50)
-pwm.set_pwm(8, 0, pwm_zero)
-pwm.set_pwm(10, 0, pwm_zero)
-pwm.set_pwm(3, 0, pwm_zero)
-
-if not sensor.init():
-        exit(1)
-if not sensor.read():
-    exit(1)
 
 class PID:
     """PID Controller
@@ -34,13 +9,25 @@ class PID:
 
     def __init__(self, P, I, D):
 
-        self.Kp = P
-        self.Ki = I
-        self.Kd = D
+        self.Kp = 250
+        self.Ki = 53
+        self.Kd = 35
 
         self.sample_time = 0.005
         self.current_time = time.time()
         self.last_time = self.current_time
+
+        self.SetPoint = 0.7
+        self.depth = 0.0
+        self.sensor_offset = 0.0
+        self.pwm_zero = 305
+
+        self.sensor = ms5837.MS5837_30BA()
+        self.sensor.setFluidDensity(1000)  # kg/m^3
+        if not self.sensor.init():
+            exit(1)
+        if not self.sensor.read():
+            exit(1)
 
         self.out_max = 400
         self.out_min = 260
@@ -48,10 +35,16 @@ class PID:
         self.fwd_zero_offset = 317
         self.bwd_zero_offset = 296
 
+        self.pwm = Adafruit_PCA9685.PCA9685()
+        self.pwm.set_pwm_freq(50)
+
+        self.pwm.set_pwm(8, 0, self.pwm_zero)
+        self.pwm.set_pwm(10, 0, self.pwm_zero)
+
+
         self.clear()
 
     def clear(self):
-        """Clears PID computations and coefficients"""
         self.SetPoint = 0.0
 
         self.PTerm = 0.0
@@ -66,12 +59,6 @@ class PID:
         self.output = 0.0
 
     def update(self, set_point, feedback_value):
-        """Calculates PID value for given reference feedback
-
-        .. math::
-            u(t) = K_p e(t) + K_i \ int_{0}^{t} e(t)dt + K_d {de}/{dt}
-
-        """
         self.SetPoint = set_point
         error = self.SetPoint - feedback_value
 
@@ -115,85 +102,50 @@ class PID:
 
         self.output = int(self.output)
 
-    def setKp(self, proportional_gain):
-        """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
-        self.Kp = proportional_gain
-
-    def setKi(self, integral_gain):
-        """Determines how aggressively the PID reacts to the current error with setting Integral Gain"""
-        self.Ki = integral_gain
-
-    def setKd(self, derivative_gain):
-        """Determines how aggressively the PID reacts to the current error with setting Derivative Gain"""
-        self.Kd = derivative_gain
-
     def setWindup(self, windup):
-        """Integral windup, also known as integrator windup or reset windup,
-        refers to the situation in a PID feedback controller where
-        a large change in setpoint occurs (say a positive change)
-        and the integral terms accumulates a significant error
-        during the rise (windup), thus overshooting and continuing
-        to increase as this accumulated error is unwound
-        (offset by errors in the other direction).
-        The specific problem is the excess overshooting.
-        """
         self.windup_guard = windup
 
     def setSampleTime(self, sample_time):
-        """PID that should be updated at a regular interval.
-        Based on a pre-determined sampe time, the PID decides if it should compute or return immediately.
-        """
         self.sample_time = sample_time
 
-def calibrate_sensor(zero_reading):
-	sensor_offset = zero_reading
+    def calibrate_sensor(self,zero_reading):
+        self.sensor_offset = zero_reading
 
-if __name__ == '__main__':
+    def Control_PID(self):
 
-    first_time_flag = 1
+        first_time_flag = 1
 
-    setpoint = input("set point: ")
-    setpoint = float(setpoint)
-#    setpoint = 0.7
+        self.SetPoint = input("set point: ")
+        self.SetPoint = float(self.SetPoint)
 
-#    p = input("p: ")
-#    p = float(p)
+        try:
+            while True:
+                if self.sensor.read():
+                    self.depth = self.sensor.depth()
 
-#    i = input("i: ")
-#    i = float(i)
+                    if first_time_flag:
+                        self.calibrate_sensor(float(self.depth))
+                        first_time_flag = 0
 
-#    d = input("d: ")
-#    d = float(d)
+                    self.depth = float(self.depth) - self.sensor_offset
 
-    depth_pid = PID(p, i, d)
+                    print("Depth: %.3f m" % (self.depth))
 
-    # print(depth_pid.output)
+                    self.update(self.SetPoint, self.depth)
 
-    try:
-        while True:
-            if sensor.read():
-                depth = sensor.depth()
+                    print("pwm: " + str(self.output))
 
-                if first_time_flag:
-                    calibrate_sensor(float(depth))
-                    first_time_flag = 0
+                    self.pwm.set_pwm(8, 0, self..output)
+                    self.pwm.set_pwm(10, 0, self.output)
 
-                depth = float(depth) - sensor_offset
+                else :
+                    print("\n")
 
-                print("Depth: %.3f m" % (depth))
+                time.sleep(self.sample_time)
 
-                depth_pid.update(setpoint, depth)
+        except KeyboardInterrupt:
+            self.pwm.set_pwm(8, 0, self.pwm_zero)
+            self.pwm.set_pwm(10, 0, self.pwm_zero)
 
-                print("pwm: " + str(depth_pid.output))
-
-                pwm.set_pwm(8, 0, depth_pid.output)
-                pwm.set_pwm(10, 0, depth_pid.output)
-
-            else :
-                print("\n")
-
-            time.sleep(sample_time)
-
-    except KeyboardInterrupt:
-        pwm.set_pwm(8, 0, pwm_zero)
-        pwm.set_pwm(10, 0, pwm_zerp)
+pid = PID(530,53,35)
+pid.Control_PID()
