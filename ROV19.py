@@ -6,9 +6,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-from HAT import *
+#from HAT import *
 from DummySensor import *
-#from DummyHat import *
+from DummyHat import *
 import selectors
 import select
 
@@ -37,8 +37,8 @@ class ROV_19:
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0,'light':0}
         self.hat_delay = 0.000020 # us
 
-        self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
-        self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1280,height=720,framerate=60/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port:" +self.stream_Ports[1]
+        self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
+        self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] +"," +self.Laptop_IP + ":" + self.stream_Ports[2]
         # for Laptop's Camera
 #        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
 #        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
@@ -74,12 +74,13 @@ class ROV_19:
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.hat.SIGNAL_Referance(self.observer_pattern.emit_Signal)
+#        self.pid.SIGNAL_Referance(self.observer_pattern.emit_Signal)
 
         self.observer_pattern.registerEventListener('HAT', self.hat.update)
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
-        # self.observer_pattern.registerEventListener('AUTONOMUS',self.pid.update)
-        # self.observer_pattern.registerEventListener('PID',self.hat.update)
+        self.observer_pattern.registerEventListener('PID',self.hat.update)
+        self.observer_pattern.registerEventListener('ENABLE_PID',self.hat.Enable_PID)
 
         self.main_Loop()
 

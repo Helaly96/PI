@@ -136,6 +136,11 @@ class Motion:
         self._verticalMotors['Vertical_Right'] = int(z)
         self._verticalMotors['Vertical_Left'] =  int(z)
 
+        if Z >= 5 and Z <= 5
+            self.emit_signal("ENABLE_PID",True)
+        else:
+            self.emit_signal("ENABLE_PID",False)
+
     def moveCamera(self):
         if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] > self.Servo_min  :
             self._servos['Main_Cam'] -= self.camera_step
@@ -168,6 +173,8 @@ class Motion:
             self._stopHorizontalMotors()
             self._setCamToNormalPosition()
             self._turnLightOff()
+            self.emit_signal("ENABLE_PID",False)
+
             print('TCP_ERROR 8adaro beena')
 
         elif event_name == 'TCP':
@@ -183,12 +190,15 @@ class Motion:
             if self._Qt_String['light'] !=0:
                  self.light()
 
-#            if self._Qt_String['z'] !=0:
-#                self._stopHorizontalMotors()
-#                self.calculateVerticalMotors_19()
-#            else:
-#                self._stopVerticalMotors()
-#                self.calculateHorizontalMotors_19()
+
+
+
+           #if self._Qt_String['z'] !=0:
+           #    self._stopHorizontalMotors()
+           #    self.calculateVerticalMotors_19()
+           #else:
+           #    self._stopVerticalMotors()
+           #    self.calculateHorizontalMotors_19()
 
         pwm = {}
         pwm.update(self._horizontalMotors)

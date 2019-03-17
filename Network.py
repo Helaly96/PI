@@ -99,6 +99,7 @@ class TCP :
 
     def close(self):
         self._emit_Signal('TCP_ERROR',{})
+
         if self._conn is not None:
             self._selector.unregister(self._conn)
             self._conn.close()

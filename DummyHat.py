@@ -4,10 +4,22 @@ class Hat:
         self.frequency = frequency
         self.emit_signal = None
         self._devices = {}
+
+        self.Zero_Vertical=305
+        self.channelZ1 = None
+        self.channelZ2 = None
+        self.Enable = False
+
     # Set the Speed of All Motors
     def add_Device(self,name,channel,zero_value):
         self._devices[name] = {'channel':channel , 'zero':zero_value , 'current': zero_value}
         print('device: ',name,self._devices[name])
+        if name == "Vertical_Right":
+            self.channelZ1 = channel
+            print ("Channel Z =",self.channelZ1)
+        elif name == "Vertical_Left":
+            self.channelZ2 = channel
+            print ("Channel Z =",self.channelZ2)
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
@@ -21,21 +33,19 @@ class Hat:
             self._devices[device_name]['current'] =pwms[device_name]
         print(pwms)
 
+    def Enable_PID(self,value):
+        self.Enable = value
+        print("Enable: ",value)
+
     def update(self, event_name,pwm):
 
         if event_name == "HAT":
             self._updatePWM(pwm)
-        if event_name == "PID":
-            self.Autonomus(pwm)
 
-    def Autonomus(self,dir:str):
-        pwm = {'Left_Front':305,'Right_Front':305,'Right_Back':305,'Left_Back':305,'Vertical_Right':305,'Vertical_Left':305}
-        if dir == "left":
-            pass
-        elif dir == "right":
-            pass
-        elif dir == "up":
-            pass
-        elif dir == "down":
-            pass
-        self._updatePWM(pwm)
+        if event_name == "PID":
+            self.PID_Control(pwm)
+
+    def PID_Control(self, pwm):
+        if self.Enable:
+            print ("PID,Control :",pwm)
+
