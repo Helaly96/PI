@@ -18,11 +18,12 @@ class Motion:
         self.Rotation_Speed = 0.40
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
-        self.Zero_Magazie = 350
+        self.Zero_Magazie = 1926
         self.CoffZ_reverse = 0.7
         self.CoffZ = 1
         self.camera_step = 5
         self.delay = False
+        self.pid_flag = False
         # =========== Motors==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -45,12 +46,12 @@ class Motion:
         self._horizontalMotors['Right_Back'] = self.Zero_thruster
         self._horizontalMotors['Left_Back'] = self.Zero_thruster
     def _stopVerticalMotors(self):
-        self._verticalMotors['Vertical_Right'] = 400
-        self._verticalMotors['Vertical_Left'] = 400
+        self._verticalMotors['Vertical_Right'] =self.Zero_thruster
+        self._verticalMotors['Vertical_Left'] = self.Zero_thruster
     def _setCamToNormalPosition(self):
         self._servos['Main_Cam'] = self.Zero_Servo
         self._servos['Back_Cam'] = self.Zero_Servo
-        self._servos['Magazine_Servo'] = 1450
+        self._servos['Magazine_Servo'] = self.Zero_Magazie
     def _turnLightOff(self):
         self._lights['light'] = 0
     def Map (self,x,motor):
@@ -128,6 +129,7 @@ class Motion:
         # steps = real pwm range / freq  = 250 M / 50 = 5 M (5000000)
         # z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,300,500)
         Z = self._Qt_String['z']
+        print("=================================================================zzzzz"+str(Z))
         if Z >= 0:
             z = self.Zero_thruster + Z * self.CoffZ
         elif Z < 0 :
@@ -136,10 +138,18 @@ class Motion:
         self._verticalMotors['Vertical_Right'] = int(z)
         self._verticalMotors['Vertical_Left'] =  int(z)
 
-        if Z >= 5 and Z <= 5
+        if Z == 0:
             self.emit_signal("ENABLE_PID",True)
+            print("da5l")
+            if not self.pid_flag:
+                self.emit_signal("SetPoint",True)
+                self.pid_flag= True
+            print("Enable True")
+
         else:
             self.emit_signal("ENABLE_PID",False)
+            print("Enable False") 
+            self.pid_flag = False
 
     def moveCamera(self):
         if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] > self.Servo_min  :
@@ -149,9 +159,9 @@ class Motion:
             self._servos['Main_Cam'] += self.camera_step
             self._servos['Back_Cam'] += self.camera_step
         elif self._Qt_String['cam'] == 2:
-            self._servos['Magazine_Servo'] = 100
+            self._servos['Magazine_Servo'] = 1800
         elif self._Qt_String['cam'] == 8:
-            self._servos['Magazine_Servo'] = 700
+            self._servos['Magazine_Servo'] = 2000
  
 
     def light(self):

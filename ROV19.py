@@ -1,4 +1,4 @@
-#from PID import *
+from depth_pid import *
 from Timer import *
 from VideoStream import *
 from Network import *
@@ -6,9 +6,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-#from HAT import *
+from HAT import *
 from DummySensor import *
-from DummyHat import *
+#from DummyHat import *
 import selectors
 import select
 
@@ -18,12 +18,12 @@ class ROV_19:
     def __init__(self):
         # ================= ROV System =========================
         # For PI 19
-#        self.RaspberryPi_IP = '10.1.1.15'
-#        self.Laptop_IP = '10.1.1.14'
+        self.RaspberryPi_IP = '10.1.1.15'
+        self.Laptop_IP = '10.1.1.14'
 
         # For Local
-        self.RaspberryPi_IP = '127.0.0.1'
-        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+#        self.RaspberryPi_IP = '127.0.0.1'
+#        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
 
         self.Port = 9005
@@ -54,7 +54,7 @@ class ROV_19:
         self.hat = Hat( self.Hat_address, self.Motors_Frequency,self.hat_delay)
         self.motion = Motion(self.Qt_String)
         self.udp_client = UDP(self.UDP_IP ,self.UDP_Port)
-#        self.pid=PID()
+        self.pid = PID(self.observer_pattern.emit_Signal)
 
         self.timer = Timer(1)
         self.Camera = Gstreamer(self.pipeline1)
@@ -68,7 +68,7 @@ class ROV_19:
         self.hat.add_Device('Vertical_Left', 10, self.motion.Zero_thruster)
         self.hat.add_Device('Main_Cam',0,400)
         self.hat.add_Device('Back_Cam',1,400)
-        self.hat.add_Device('Magazine_Servo',2,1450)
+        self.hat.add_Device('Magazine_Servo',2,1926)
         self.hat.Raspberry_pi_Power(3,1500)
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
@@ -81,6 +81,9 @@ class ROV_19:
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
         self.observer_pattern.registerEventListener('PID',self.hat.update)
         self.observer_pattern.registerEventListener('ENABLE_PID',self.hat.Enable_PID)
+        self.observer_pattern.registerEventListener('SetPoint',self.pid.set_Setpoint_to_depth)
+
+        threading.Thread(target=self.pid.Control_PID,args=("s",)).start()
 
         self.main_Loop()
 

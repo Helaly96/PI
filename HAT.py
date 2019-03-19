@@ -34,9 +34,9 @@ class Hat:
         self.emit_signal=Observer_Pattern_Signal
 
     def _updatePWM(self,pwms:dict):
-        for device_name in self.pwms:
-            if ( device_name == "Vertical_Right" or device_name == "Vertical_Right" ) and self.Enable == True:
-                print ("Joystick can't change in Z")
+        for device_name in self._devices:
+            if ( device_name == "Vertical_Right" or device_name == "Vertical_Left" ) and self.Enable == True:
+#                print ("Joystick can't change in Z")
                 continue
             if self._devices[device_name]['current'] == pwms[device_name]:
                 continue
@@ -45,7 +45,7 @@ class Hat:
             time.sleep(self.delay)
         print(pwms)
 
-    def Enable_PID(self,value):
+    def Enable_PID(self,event,value):
         self.Enable = value
         print("Enable: ",value)
 
