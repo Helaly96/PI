@@ -1,5 +1,7 @@
 import selectors
 import socket
+from subprocess import PIPE, Popen
+
 
 class TCP :
     def __init__(self,selector,ip:str,port:int, streamingIP:str ):
@@ -14,7 +16,7 @@ class TCP :
         self._client_address = None
         self._emit_Signal = None
         self._stream_disconect = False
-
+        self.pilot_enable = False
         self._selector = selector
         self._create_Socket()
         self._bind_Listen()
@@ -77,6 +79,49 @@ class TCP :
         self._selector.register(self._conn,selectors.EVENT_READ,self._recv)
         # =========================================================
 
+    def send_Temp(self,event,sensor_temp):
+        # get pi temp
+        print(event)
+#        process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)x=0,y=100,r=0,z=0,cam=0,light=0&
+
+#        output, _error = process.communicate()
+
+        output=b'uncomment in send_Temp Network.py'
+        pi_temp = output.decode()
+
+        temp = str(sensor_temp)+' '+str(pi_temp)
+        self._conn.sendall(temp.encode())
+
+    def Check_for_Special_Msgs(self,msg):
+        if msg == "PID":
+            self.pilot_enable = not self.pilot_enable
+            self._emit_Signal("Pilot_Enable",self.pilot_enable)
+            return True
+        elif msg == "Temp":
+            self._emit_Signal("Temp")
+            return True
+
+        elif msg == "Micro_ROV 1":
+            self._emit_Signal('Micro_ROV',1)
+            return True
+        elif msg == "Micro_ROV 0":
+            self._emit_Signal('Micro_ROV',0)
+            return True
+
+        elif msg == 'Pulley 1':
+            self._emit_Signal('Pulley',1)
+            return True
+
+        elif msg == 'Pulley 0':
+            self._emit_Signal('Pulley',0)
+            return True
+
+        elif msg == 'Pulley -1':
+            self._emit_Signal('Pulley',-1)
+            return True
+
+
+        return False
     def _recv(self):
         data = self._conn.recv(self._buffer_size).decode(encoding="UTF-8")
 #        print(data)
@@ -84,6 +129,9 @@ class TCP :
             self.close()
             return
 
+        Special = self.Check_for_Special_Msgs(data)
+        if Special:
+            return
 
         try:
             Qtstrings=self.Split_to_Dict(data)

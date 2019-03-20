@@ -2,6 +2,22 @@ import time
 import ms5837
 
 
+class SENSOR():
+    def __init__(self):
+        self.y= 0.0
+    def setFluidDensity(self,x):
+        self.x = x
+    def depth(self):
+        self.y = 5022.3
+        return self.y
+    def temperature(self,x):
+        return 37
+
+    def init(self):
+        return True
+    def read(self):
+        return True
+
 class PID:
     """PID Controller
     """
@@ -14,9 +30,6 @@ class PID:
         self.Kp = 250
         self.Ki = 53
         self.Kd = 35
-
-        self.sensor = ms5837.MS5837_30BA()
-        self.sensor.setFluidDensity(1000)  # kg/m^3
 
         self.sample_time = 0.01
         self.current_time = time.time()

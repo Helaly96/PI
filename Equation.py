@@ -129,7 +129,7 @@ class Motion:
         # steps = real pwm range / freq  = 250 M / 50 = 5 M (5000000)
         # z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,300,500)
         Z = self._Qt_String['z']
-        print("=================================================================zzzzz"+str(Z))
+#        print("=================================================================zzzzz"+str(Z))
         if Z >= 0:
             z = self.Zero_thruster + Z * self.CoffZ
         elif Z < 0 :
@@ -140,16 +140,17 @@ class Motion:
 
         if Z == 0:
             self.emit_signal("ENABLE_PID",True)
-            print("da5l")
             if not self.pid_flag:
                 self.emit_signal("SetPoint",True)
                 self.pid_flag= True
-            print("Enable True")
+                print("Enable True")
 
         else:
             self.emit_signal("ENABLE_PID",False)
-            print("Enable False") 
-            self.pid_flag = False
+
+            if self.pid_flag :
+                print("Enable False")
+                self.pid_flag = False
 
     def moveCamera(self):
         if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] > self.Servo_min  :
@@ -184,6 +185,7 @@ class Motion:
             self._setCamToNormalPosition()
             self._turnLightOff()
             self.emit_signal("ENABLE_PID",False)
+            self.emit_signal('Pilot_Enable',False)
 
             print('TCP_ERROR 8adaro beena')
 

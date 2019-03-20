@@ -1,3 +1,4 @@
+#from dummy_depth_pid import *
 from depth_pid import *
 from Timer import *
 from VideoStream import *
@@ -22,8 +23,8 @@ class ROV_19:
         self.Laptop_IP = '10.1.1.14'
 
         # For Local
-#        self.RaspberryPi_IP = '127.0.0.1'
-#        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+        self.RaspberryPi_IP = '127.0.0.1'
+        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
 
         self.Port = 9005
@@ -83,6 +84,16 @@ class ROV_19:
         self.observer_pattern.registerEventListener('ENABLE_PID',self.hat.Enable_PID)
         self.observer_pattern.registerEventListener('SetPoint',self.pid.set_Setpoint_to_depth)
 
+        self.observer_pattern.registerEventListener('ENABLE_PID',self.pid.Enable_PID)
+        self.observer_pattern.registerEventListener('Pilot_Enable',self.hat.Pilot_Enable)
+        self.observer_pattern.registerEventListener('Pilot_Enable',self.pid.Pilot_Enable)
+
+        self.observer_pattern.registerEventListener('Temp',self.pid.get_Temp)
+        self.observer_pattern.registerEventListener('Send_Temp',self.tcp_server.send_Temp)
+        self.observer_pattern.registerEventListener('Micro_ROV',self.hat.update)
+        self.observer_pattern.registerEventListener('Pulley',self.hat.update)
+
+
         threading.Thread(target=self.pid.Control_PID,args=("s",)).start()
 
         self.main_Loop()
@@ -102,7 +113,7 @@ class ROV_19:
             try:
                 events = self.selector.select(2)
 
-                self.selector_print()
+#                self.selector_print()
                 for key, mask in events:
                     key.data()
 
