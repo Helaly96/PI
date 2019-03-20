@@ -40,8 +40,9 @@ class ROV_19:
 
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] +"," +self.Laptop_IP + ":" + self.stream_Ports[2]
+        self.pipeline3 = "v4l2src device=/dev/video2 ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=10.1.1.14 port=10022"
         # for Laptop's Camera
-#        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
+#       self.pipeline3 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
 #        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
 
         # Qt String .. x=0,y=100,r=0,z=0,cam=0,light=0,
@@ -60,7 +61,8 @@ class ROV_19:
         self.timer = Timer(1)
         self.Camera = Gstreamer(self.pipeline1)
         self.Camera2 = Gstreamer(self.pipeline2)
-
+        self.Camera3 =Gstreamer(self.pipeline3)
+        
         self.hat.add_Device('Left_Front', 7, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Front', 4, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Back', 12,self.motion.Zero_thruster)
