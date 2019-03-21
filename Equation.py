@@ -8,8 +8,8 @@ class Motion:
         # =========== Constants ===========
         self.Zero_thruster = 305
         self.Zero_Servo = 225
-        self.Servo_min = 150
-        self.Servo_max = 570
+        self.Servo_min = 100
+        self.Servo_max = 390
         self.Brake = 240
         self.Forward = 420
         self.Joystick_min = -100

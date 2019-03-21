@@ -8,5 +8,5 @@ while True:
 
     x = input("enter PWM:")
     x=int(x)
-    pwm.set_pwm(7, 0, x)
+    pwm.set_pwm(5, 0, x)
 
