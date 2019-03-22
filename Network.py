@@ -82,11 +82,10 @@ class TCP :
     def send_Temp(self,event,sensor_temp):
         # get pi temp
         print(event)
-#        process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)x=0,y=100,r=0,z=0,cam=0,light=0&
+        process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)
+        output, _error = process.communicate()
 
-#        output, _error = process.communicate()
-
-        output=b'uncomment in send_Temp Network.py'
+#        output=b'uncomment in send_Temp Network.py'
         pi_temp = output.decode()
 
         temp = str(sensor_temp)+' '+str(pi_temp)

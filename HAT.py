@@ -19,11 +19,11 @@ class Hat:
         self.pilot_enable = False
 
 
-        self.channel_micro = 5
+        self.channel_micro = 3
         self.zero_micro = 0
         self.forward_micro = 4000
 
-        self.channel_pulley = 6
+        self.channel_pulley = 4
         self.zero_pulley = 305
         self.pulley_forward = 400
         self.pulley_reverse = 200
@@ -63,6 +63,9 @@ class Hat:
 
     def Pilot_Enable(self,event,enable):
         self.pilot_enable = enable
+        if not self.pilot_enable :
+            self._hat.set_pwm(self.channelZ1,0,self.Zero_Vertical)
+            self._hat.set_pwm(self.channelZ2,0,self.Zero_Vertical)
 
     def Enable_PID(self,event,value):
         self.Enable = value
@@ -97,8 +100,11 @@ class Hat:
 
     def PID_Control(self, pwm):
         if self.Enable:
-            self._hat.set_pwm(self.channelZ1,0,pwm)
-            self._hat.set_pwm(self.channelZ2,0,pwm)
+            self._hat.set_pwm(self.channelZ1,0,int(pwm))
+            self._hat.set_pwm(self.channelZ2,0,int(pwm))
+            self._devices['Vertical_Left']['current'] =int(pwm)
+            self._devices['Vertical_Right']['current'] =int(pwm)
+
 #            print ("Z_pwm:",pwm)
     def Autonomus(self,dir:str):
         pwm = {'Left_Front':305,'Right_Front':305,'Right_Back':305,'Left_Back':305,'Vertical_Right':305,'Vertical_Left':305}

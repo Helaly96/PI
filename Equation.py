@@ -8,8 +8,8 @@ class Motion:
         # =========== Constants ===========
         self.Zero_thruster = 305
         self.Zero_Servo = 225
-        self.Servo_min = 150
-        self.Servo_max = 570
+        self.Servo_min = 100
+        self.Servo_max = 360
         self.Brake = 240
         self.Forward = 420
         self.Joystick_min = -100
@@ -18,7 +18,7 @@ class Motion:
         self.Rotation_Speed = 0.40
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
-        self.Zero_Magazie = 1926
+        self.Zero_Magazie = 1925
         self.CoffZ_reverse = 0.7
         self.CoffZ = 1
         self.camera_step = 5

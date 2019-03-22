@@ -1,5 +1,5 @@
-#from dummy_depth_pid import *
-from depth_pid import *
+from dummy_depth_pid import *
+#from depth_pid import *
 from Timer import *
 from VideoStream import *
 from Network import *
@@ -23,8 +23,8 @@ class ROV_19:
         self.Laptop_IP = '10.1.1.14'
 
         # For Local
-        self.RaspberryPi_IP = '127.0.0.1'
-        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+#        self.RaspberryPi_IP = '127.0.0.1'
+#        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
 
         self.Port = 9005
@@ -61,23 +61,23 @@ class ROV_19:
         self.timer = Timer(1)
         self.Camera = Gstreamer(self.pipeline1)
         self.Camera2 = Gstreamer(self.pipeline2)
-        self.Camera3 =Gstreamer(self.pipeline3)
-        
+#        self.Camera3 =Gstreamer(self.pipeline3)
+
         self.hat.add_Device('Left_Front', 7, self.motion.Zero_thruster)
-        self.hat.add_Device('Right_Front', 4, self.motion.Zero_thruster)
-        self.hat.add_Device('Right_Back', 12,self.motion.Zero_thruster)
+        self.hat.add_Device('Right_Front', 5, self.motion.Zero_thruster)
+        self.hat.add_Device('Right_Back', 13,self.motion.Zero_thruster)
         self.hat.add_Device('Left_Back',15 , self.motion.Zero_thruster)
-        self.hat.add_Device('Vertical_Right', 8, self.motion.Zero_thruster)
-        self.hat.add_Device('Vertical_Left', 10, self.motion.Zero_thruster)
-        self.hat.add_Device('Main_Cam',0,400)
-        self.hat.add_Device('Back_Cam',1,400)
-        self.hat.add_Device('Magazine_Servo',2,1926)
-        self.hat.Raspberry_pi_Power(3,1500)
+        self.hat.add_Device('Vertical_Right', 9, self.motion.Zero_thruster)
+        self.hat.add_Device('Vertical_Left', 11, self.motion.Zero_thruster)
+        self.hat.add_Device('Main_Cam',0,225)
+        self.hat.add_Device('Back_Cam',1,225)
+        self.hat.add_Device('Magazine_Servo',3,self.motion.Zero_Magazie)
+        self.hat.Raspberry_pi_Power(8,400)
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.hat.SIGNAL_Referance(self.observer_pattern.emit_Signal)
-#        self.pid.SIGNAL_Referance(self.observer_pattern.emit_Signal)
+        self.pid.SIGNAL_Referance(self.observer_pattern.emit_Signal)
 
         self.observer_pattern.registerEventListener('HAT', self.hat.update)
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
@@ -96,7 +96,7 @@ class ROV_19:
         self.observer_pattern.registerEventListener('Pulley',self.hat.update)
 
 
-        threading.Thread(target=self.pid.Control_PID,args=("s",)).start()
+#        threading.Thread(target=self.pid.Control_PID,args=("s",)).start()
 
         self.main_Loop()
 

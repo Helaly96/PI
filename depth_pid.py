@@ -27,8 +27,9 @@ class PID:
         self.sensor_offset = 0.4
         self.pwm_zero = 305
 
-        self.sensor = SENSOR()
-        self.sensor.setFluidDensity(1000)  # kg/m^3
+#        self.sensor = SENSOR()
+
+#        self.sensor.setFluidDensity(1000)  # kg/m^3
 
         self.out_max = 400
         self.out_min = 240
@@ -147,11 +148,11 @@ class PID:
                     else :
                         print("Sensor read unavalable,\n")
 
-                    time.sleep(3)
+                    time.sleep(0.005)
                 # ==============================================================
                 else:
     #                print ("Pilot_Enable:",self.pilot_enable)
-                    time.sleep(2)
+                    time.sleep(0.5)
         except KeyboardInterrupt:
             self.emit_Signal("PID",self.pwm_zero)
 
