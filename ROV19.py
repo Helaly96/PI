@@ -71,8 +71,13 @@ class ROV_19:
         self.hat.add_Device('Vertical_Left', 11, self.motion.Zero_thruster)
         self.hat.add_Device('Main_Cam',0,225)
         self.hat.add_Device('Back_Cam',1,225)
+<<<<<<< HEAD
         self.hat.add_Device('Magazine_Servo',3,self.motion.Zero_Magazie)
         self.hat.Raspberry_pi_Power(8,400)
+=======
+        self.hat.add_Device('Magazine_Servo',2,1926)
+        self.hat.Raspberry_pi_Power(3,1500)
+>>>>>>> 59b1c919f6b381d29c4324b6c6de23b7d243e48f
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)

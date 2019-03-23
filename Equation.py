@@ -11,7 +11,11 @@ class Motion:
         self.Zero_thruster = 305
         self.Zero_Servo = 225
         self.Servo_min = 100
+<<<<<<< HEAD
         self.Servo_max = 360
+=======
+        self.Servo_max = 390
+>>>>>>> 59b1c919f6b381d29c4324b6c6de23b7d243e48f
         self.Brake = 240
         self.Forward = 420
         self.Joystick_min = -100
