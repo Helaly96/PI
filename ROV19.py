@@ -73,6 +73,8 @@ class ROV_19:
         self.hat.add_Device('Back_Cam',1,225)
         self.hat.add_Device('Magazine_Servo',3,self.motion.Zero_Magazie)
         self.hat.Raspberry_pi_Power(8,400)
+        self.hat.add_Device('Magazine_Servo',2,1926)
+        self.hat.Raspberry_pi_Power(3,1500)
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
@@ -87,7 +89,7 @@ class ROV_19:
         self.observer_pattern.registerEventListener('SetPoint',self.pid.set_Setpoint_to_depth)
 
         self.observer_pattern.registerEventListener('ENABLE_PID',self.pid.Enable_PID)
-        self.observer_pattern.registerEventListener('Pilot_Enable',self.hat.Pilot_Enable)
+#        self.observer_pattern.registerEventListener('Pilot_Enable',self.hat.Pilot_Enable)
         self.observer_pattern.registerEventListener('Pilot_Enable',self.pid.Pilot_Enable)
 
         self.observer_pattern.registerEventListener('Temp',self.pid.get_Temp)
