@@ -7,9 +7,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-#from HAT import *
+from HAT import *
 from DummySensor import *
-from DummyHat import *
+#from DummyHat import *
 import selectors
 import select
 
@@ -23,8 +23,8 @@ class ROV_19:
         self.Laptop_IP = '10.1.1.14'
 
         # For Local
-        self.RaspberryPi_IP = '127.0.0.1'
-        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+#        self.RaspberryPi_IP = '127.0.0.1'
+#        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
 
         self.Port = 9005
