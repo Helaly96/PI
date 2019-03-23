@@ -1,5 +1,7 @@
 import time
 import math
+#import RPi.GPIO as GPIO
+
 class Motion:
     def __init__(self,Qt_String):
 
@@ -24,6 +26,10 @@ class Motion:
         self.camera_step = 5
         self.delay = False
         self.pid_flag = False
+
+        self.Switch_pin = 26
+        self.Magazine_flag = False
+#        self.Setup_GPIO()
         # =========== Motors==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -35,6 +41,23 @@ class Motion:
         self._setCamToNormalPosition()
         self._turnLightOff()
         # ==================================
+
+    def Setup_GPIO(self):
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(pin, GPIO.OUT)
+
+    def Switch_on_off_Magazine(self, enable):
+        if enable and self.Magazine_flag:
+#            GPIO.output(self.Switch_pin, 1)
+            print("Switch ON")
+            self.Magazine_flag = False
+
+        elif not enable and not self.Magazine_flag:
+#            GPIO.output(self.Switch_pin, 0)
+            print("Switch OFF")
+            self.Magazine_flag = True
+        time.sleep(0.05)
+
     def setRangeZ(self,x):
         if x == 0 :
             self.CoffZ = 0.7
@@ -52,6 +75,8 @@ class Motion:
         self._servos['Main_Cam'] = self.Zero_Servo
         self._servos['Back_Cam'] = self.Zero_Servo
         self._servos['Magazine_Servo'] = self.Zero_Magazie
+        self.Switch_on_off_Magazine(False)
+
     def _turnLightOff(self):
         self._lights['light'] = 0
     def Map (self,x,motor):
@@ -160,8 +185,10 @@ class Motion:
             self._servos['Main_Cam'] += self.camera_step
             self._servos['Back_Cam'] += self.camera_step
         elif self._Qt_String['cam'] == 2:
+            self.Switch_on_off_Magazine(True)
             self._servos['Magazine_Servo'] = 1800
         elif self._Qt_String['cam'] == 8:
+            self.Switch_on_off_Magazine(True)
             self._servos['Magazine_Servo'] = 2000
  
 
@@ -199,6 +226,8 @@ class Motion:
                  self.delay = True
             else :
                  self._servos['Magazine_Servo'] = self.Zero_Magazie
+                 self.Switch_on_off_Magazine(False)
+
             if self._Qt_String['light'] !=0:
                  self.light()
 

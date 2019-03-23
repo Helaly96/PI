@@ -1,7 +1,6 @@
 import time
 import Adafruit_PCA9685
 
-
 class Hat:
     def __init__(self, address, frequency,delay):
         self._hat = Adafruit_PCA9685.PCA9685()
@@ -15,6 +14,7 @@ class Hat:
         self.Zero_Vertical=305
         self.channelZ1 = None
         self.channelZ2 = None
+        self.Magazine_Channel = None
         self.Enable = False
         self.pilot_enable = False
 
@@ -27,7 +27,8 @@ class Hat:
         self.zero_pulley = 305
         self.pulley_forward = 400
         self.pulley_reverse = 200
-    # Set the Speed of All Motors
+
+        # Set the Speed of All Motors
     def add_Device(self,name,channel,zero_value):
         self._devices[name] = {'channel':channel , 'zero':zero_value , 'current': zero_value}
         self._hat.set_pwm(channel,0,int(zero_value))
@@ -38,6 +39,9 @@ class Hat:
         elif name == "Vertical_Left":
             self.channelZ2 = channel
             print ("Channel Z =",self.channelZ2)
+        elif name == "Magazine_Servo":
+            self.Magazine_Channel = channel
+            print ("Magazine Channel :",self.Magazine_Channel)
 
     def Raspberry_pi_Power(self,channel,value):
         self._hat.set_pwm(channel,0,value)
@@ -45,17 +49,21 @@ class Hat:
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
 
+
+
     def _updatePWM(self,pwms:dict):
         for device_name in pwms:
-            # Check for PID Mode Controlled By Pilot
+            # Check for PID Mode Controlled By Pilot ==================================
             if self.pilot_enable:
                 # Check for PID Enable Controlled by Equation
                 if ( device_name == "Vertical_Right" or device_name == "Vertical_Left" ) and self.Enable == True:
                     print ("Joystick can't change in Z")
                     continue
+             # ========================================================================
             # Check for Repetetion
             if self._devices[device_name]['current'] == pwms[device_name]:
                 continue
+
             self._devices[device_name]['current'] =pwms[device_name]
             self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
             time.sleep(self.delay)
