@@ -85,9 +85,8 @@ class TCP :
         process = Popen(['vcgencmd', 'measure_temp'], stdout=PIPE)
         output, _error = process.communicate()
 
-#        output=b'uncomment in send_Temp Network.py'
         pi_temp = output.decode()
-
+        pi_temp = "\nPI_"+pi_temp
         temp = str(sensor_temp)+' '+str(pi_temp)
         self._conn.sendall(temp.encode())
 
@@ -98,6 +97,7 @@ class TCP :
             return True
         elif msg == "Temp":
             self._emit_Signal("Temp")
+            self._emit_Signal("Send_Temp"," ")
             return True
 
         elif msg == "Micro_ROV 1":
