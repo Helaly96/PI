@@ -10,7 +10,7 @@ class PID:
         self.emit_Signal =  emitsignal
         self.pilot_enable = False
         self.enable = False
-# 250 53 35
+
         self.Kp = 250
         self.Ki = 53
         self.Kd = 35
@@ -22,14 +22,10 @@ class PID:
         self.current_time = time.time()
         self.last_time = self.current_time
 
-        self.SetPoint = 0.7
         self.depth = 0.0
-        self.sensor_offset = 0.4
+#        self.sensor_offset = self.sensor.depth()
+        self.sensor_offset = 0.0
         self.pwm_zero = 305
-
-#        self.sensor = SENSOR()
-
-#        self.sensor.setFluidDensity(1000)  # kg/m^3
 
         self.out_max = 400
         self.out_min = 240
@@ -42,6 +38,8 @@ class PID:
         if not self.sensor.read():
             exit(1)
 
+        self.SetPoint=0.0
+        print(self.SetPoint)
 
         self.clear()
 
@@ -121,7 +119,12 @@ class PID:
 
     def set_Setpoint_to_depth(self,event_name,flag):
         if flag :
-            self.SetPoint=self.sensor.depth()
+            try:
+                self.SetPoint=self.sensor.depth()
+            except OSError:
+                self.emit_Signal("Pilot_Enable",False)
+                for i in range(10):
+                    print("Ray2")
 
     def Pilot_Enable(self,event,enable):
         self.pilot_enable = enable
@@ -135,12 +138,14 @@ class PID:
         first_time_flag = 1
         try:
             while True:
-                if self.pilot_enable and self.enable:
-            # ==============================================================
+               if self.pilot_enable and self.enable:
+               # ==============================================================
+                try:
                     if self.sensor.read():
                         self.depth = self.sensor.depth()
 
                         self.depth = float(self.depth) - self.sensor_offset
+                        print("Setpoint:",self.SetPoint)
                         self.update(self.SetPoint, self.depth)
 
                         print("Depth: %.3f m" % (self.depth),"pwm: " + str(self.output))
@@ -149,10 +154,14 @@ class PID:
                         print("Sensor read unavalable,\n")
 
                     time.sleep(0.005)
-                # ==============================================================
+                except :
+                    print ("ERROR RAY2")
+                    continue 
+
+# ==============================================================
                 else:
     #                print ("Pilot_Enable:",self.pilot_enable)
-                    time.sleep(0.5)
+                    time.sleep(0.1)
         except KeyboardInterrupt:
             self.emit_Signal("PID",self.pwm_zero)
 

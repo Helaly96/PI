@@ -219,9 +219,12 @@ class Motion:
 
         elif event_name == 'TCP':
             self._Qt_String = Qt_String.copy()
-            self.calculateVerticalMotors_19()
-            self.calculateHorizontalMotors_19()
-
+            try:
+             self.calculateVerticalMotors_19()
+             self.calculateHorizontalMotors_19()
+            except KeyError:
+             print("Key Error Ray2")
+             return
             if self._Qt_String['cam'] != 0:
                  self.moveCamera()
                  self.delay = True
