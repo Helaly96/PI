@@ -1,8 +1,6 @@
 import time
-import ms5837
 
-
-class SENSOR():
+class MS5837_30BA():
     def __init__(self):
         self.y= 0.0
     def setFluidDensity(self,x):
@@ -26,23 +24,19 @@ class PID:
         self.emit_Signal =  emitsignal
         self.pilot_enable = False
         self.enable = False
-# 250 53 35
+
         self.Kp = 250
         self.Ki = 53
         self.Kd = 35
+
+        self.sensor = MS5837_30BA()
+        self.sensor.setFluidDensity(1000)  # kg/m^3
 
         self.sample_time = 0.01
         self.current_time = time.time()
         self.last_time = self.current_time
 
-        self.SetPoint = 0.7
-        self.depth = 0.0
-        self.sensor_offset = 0.4
         self.pwm_zero = 305
-
-        self.sensor = SENSOR()
-        self.sensor.setFluidDensity(1000)  # kg/m^3
-
         self.out_max = 400
         self.out_min = 240
         self.zero_offset = 305
@@ -54,6 +48,10 @@ class PID:
         if not self.sensor.read():
             exit(1)
 
+        self.depth = 0.0
+        self.sensor_offset = self.sensor.depth()
+        self.SetPoint = 1
+        
 
         self.clear()
 
@@ -126,33 +124,38 @@ class PID:
     def calibrate_sensor(self,zero_reading):
         self.sensor_offset =  0
 
-
-
     def get_Temp(self,event):
         self.emit_Signal ('Send_Temp',self.sensor.temperature(ms5837.UNITS_Centigrade) )
 
     def set_Setpoint_to_depth(self,event_name,flag):
-        if flag :
-            self.SetPoint=self.sensor.depth()
+        if flag and self.pilot_enable:
+            try:
+                self.sensor.read()
+                self.SetPoint = self.sensor.depth() - self.sensor_offset
+                print("SetPoint:",self.SetPoint)
+            except OSError:
+                print("SetPoint OSError")
+                self.emit_Signal("Pilot_Enable",False)
 
     def Pilot_Enable(self,event,enable):
         self.pilot_enable = enable
         print("Pilot_Enable:", self.pilot_enable)
+        self.set_Setpoint_to_depth("set_Setpoint_to_depth",self.pilot_enable)
 
     def Enable_PID(self,event,enable):
         self.enable = enable
 
     def Control_PID(self,s):
-
-        first_time_flag = 1
         try:
             while True:
-                if self.pilot_enable and self.enable:
-            # ==============================================================
+               if self.pilot_enable and self.enable:
+               # ==============================================================
+                try:
                     if self.sensor.read():
                         self.depth = self.sensor.depth()
 
                         self.depth = float(self.depth) - self.sensor_offset
+
                         self.update(self.SetPoint, self.depth)
 
                         print("Depth: %.3f m" % (self.depth),"pwm: " + str(self.output))
@@ -160,17 +163,15 @@ class PID:
                     else :
                         print("Sensor read unavalable,\n")
 
-                    time.sleep(3)
+                    time.sleep(self.sample_time)
+                except OSError :
+                    print ("ERROR PID RAY2")
+                    continue 
+                except :
+                    print("ERROR IN PID LOOP")
+                    
                 # ==============================================================
                 else:
-    #                print ("Pilot_Enable:",self.pilot_enable)
-                    time.sleep(2)
+                    time.sleep(self.sample_time/10)
         except KeyboardInterrupt:
             self.emit_Signal("PID",self.pwm_zero)
-
-
-# def ray2(event,output):
-#     return
-# pid = PID(ray2)
-# pid.Control_PID(5)
-

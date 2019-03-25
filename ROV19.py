@@ -1,4 +1,4 @@
-#from dummy_depth_pid i0mport *
+#from dummy_depth_pid import *
 from depth_pid import *
 from Timer import *
 from VideoStream import *
@@ -12,6 +12,7 @@ from DummySensor import *
 #from DummyHat import *
 import selectors
 import select
+import sys
 
 
 class ROV_19:
@@ -26,7 +27,6 @@ class ROV_19:
 #        self.RaspberryPi_IP = '127.0.0.1'
 #        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
-
         self.Port = 9005
         self.Autonomus_Port = 9000
         self.stream_Ports = ['5022','5000','10000']
@@ -35,14 +35,14 @@ class ROV_19:
         self.Hat_address = 0x40
         self.Motors_Frequency = 50
         self.Zero_Vertical = 400
-        self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0,'light':0}
+        self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0}
         self.hat_delay = 0.000020 # us
 
-        self.pipeline1 = "v4l2src device=/dev/video1 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
-        self.pipeline2 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] +"," +self.Laptop_IP + ":" + self.stream_Ports[2]
+        self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] +"," +self.Laptop_IP + ":" + self.stream_Ports[2]
+        self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
         self.pipeline3 = "v4l2src device=/dev/video2 ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=10.1.1.14 port=10022"
         # for Laptop's Camera
-#       self.pipeline3 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
+#        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
 #        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
 
         # Qt String .. x=0,y=100,r=0,z=0,cam=0,light=0,
@@ -69,8 +69,8 @@ class ROV_19:
         self.hat.add_Device('Left_Back',15 , self.motion.Zero_thruster)
         self.hat.add_Device('Vertical_Right', 9, self.motion.Zero_thruster)
         self.hat.add_Device('Vertical_Left', 11, self.motion.Zero_thruster)
-        self.hat.add_Device('Main_Cam',0,225)
-        self.hat.add_Device('Back_Cam',1,225)
+        self.hat.add_Device('Main_Cam',0,self.motion.Zero_Servo)
+        self.hat.add_Device('Back_Cam',1,self.motion.Zero_Servo)
         self.hat.add_Device('Magazine_Servo',3,self.motion.Zero_Magazie)
         self.hat.Raspberry_pi_Power(8,305)
 
@@ -78,18 +78,18 @@ class ROV_19:
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.hat.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.pid.SIGNAL_Referance(self.observer_pattern.emit_Signal)
-
+        # Main Events
         self.observer_pattern.registerEventListener('HAT', self.hat.update)
         self.observer_pattern.registerEventListener('TCP', self.motion.update)
         self.observer_pattern.registerEventListener('TCP_ERROR', self.motion.update)
+        # PID Integration Events
         self.observer_pattern.registerEventListener('PID',self.hat.update)
-        self.observer_pattern.registerEventListener('ENABLE_PID',self.hat.Enable_PID)
         self.observer_pattern.registerEventListener('SetPoint',self.pid.set_Setpoint_to_depth)
-
+        self.observer_pattern.registerEventListener('ENABLE_PID',self.hat.Enable_PID)
         self.observer_pattern.registerEventListener('ENABLE_PID',self.pid.Enable_PID)
         self.observer_pattern.registerEventListener('Pilot_Enable',self.hat.Pilot_Enable)
         self.observer_pattern.registerEventListener('Pilot_Enable',self.pid.Pilot_Enable)
-
+        # Buttons Events
         self.observer_pattern.registerEventListener('Temp',self.pid.get_Temp)
         self.observer_pattern.registerEventListener('Send_Temp',self.tcp_server.send_Temp)
         self.observer_pattern.registerEventListener('Micro_ROV',self.hat.update)
@@ -115,11 +115,11 @@ class ROV_19:
             try:
                 events = self.selector.select(2)
 
-                self.selector_print()
+ #               self.selector_print()
                 for key, mask in events:
                     key.data()
 
-            except TimeoutError:
+            except (TimeoutError,ConnectionResetError) :
                 self.tcp_server.hard_Shutdown_Recreate_Socket()
             except KeyboardInterrupt:
                 print(' Tari2 El Salama Enta')
@@ -128,7 +128,10 @@ class ROV_19:
                 self.Camera.close()
                 self.Camera2.close()
                 return
-try :
-    ORCA = ROV_19()
-except Exception as e:
-    print(e)
+
+            # Important
+            except:
+                print("Exception Msh Ray2:",sys.exc_info()[0])
+                self.tcp_server.hard_Shutdown_Recreate_Socket()
+            
+ORCA = ROV_19()

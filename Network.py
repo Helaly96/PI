@@ -5,9 +5,8 @@ from subprocess import PIPE, Popen
 
 class TCP :
     def __init__(self,selector,ip:str,port:int, streamingIP:str ):
-#        self.Type=Type
-        self._buffer_size = 1024
-        self.Num_Of_tokens = 6
+        self._buffer_size = 4096
+        self.Num_Of_tokens = 5
         self._ip = ip
         self._port = port
         self._streamIP = streamingIP
@@ -42,8 +41,8 @@ class TCP :
             self._socket.bind( (self._ip,self._port) )
             self._socket.listen(1)
         except socket.error:
-            print('socket error while binding socket')
-            print("sh5al 5las")
+            print('Close The Code from htop->F9->9')
+            print('Check IP and Port')
             quit()
             return
 
@@ -54,8 +53,6 @@ class TCP :
         # if someone tries to connect the pi while it is already connected
         if self._conn is not None:
 
-            if self.Type == "QT":
-                print("someone tries to connect pi")
             # ========== Close The old and open new Connection ===============================
             # self.close()
             # self._conn , self._client_address = self._socket.accept()
@@ -63,6 +60,7 @@ class TCP :
             # print("D5ool Rayaaaaaaaaaaaaaaaaaa2")
 
             # =========== Pull the Event from Selectors and close it and keep the old =========
+            print("someone tries to connect pi")
             temp_conn , _ = self._socket.accept()
             temp_conn.close()
             return
@@ -161,17 +159,14 @@ class TCP :
         n = len (msgs)
         del msgs[ n -1 ]
 
-        if n == 1:
-            Qt_strings.append( {} )
-            msg = msgs[0].split(',')
-            for term in msg:
-                temp_list = term.split("=")
-                Qt_strings[0][temp_list[0]] = int(temp_list[1])
-            return Qt_strings
-
         if n > 1 :
             for msg in msgs :
                 temp_msg = msg.split(',')
+
+                if len(temp_msg) != self.Num_Of_tokens:
+                    print("Num of Terms(",len(temp_msg),") Dosn't Equal",self.Num_Of_tokens)
+                    return None                
+
                 temp_Qt_string = {}
                 for term in temp_msg:
                     temp_list = term.split("=")
@@ -180,7 +175,7 @@ class TCP :
 #            print("Qt_strings:",Qt_strings)
             return Qt_strings
 
-        elif n == 0:
+        elif n <= 1:
             print('num of tokens error')
             return None
 
@@ -192,7 +187,6 @@ class TCP :
         self._socket.shutdown(2)
         self._socket.close()
         self._socket = None
-        print("Socket is Dead Tari2 El Salama enta")
         self._create_Socket()
         self._bind_Listen()
-        print("New Socket Created ...............")
+        print(" .................New Socket Created ...............")

@@ -1,6 +1,6 @@
 import time
 import math
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 class Motion:
     def __init__(self,Qt_String):
@@ -30,7 +30,7 @@ class Motion:
 
         self.Switch_pin = 26
         self.Magazine_flag = False
-#        self.Setup_GPIO()
+        self.Setup_GPIO()
         # =========== Motors==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -40,7 +40,6 @@ class Motion:
         self._stopHorizontalMotors()
         self._stopVerticalMotors()
         self._setCamToNormalPosition()
-        self._turnLightOff()
         # ==================================
 
     def Setup_GPIO(self):
@@ -49,15 +48,16 @@ class Motion:
 
     def Switch_on_off_Magazine(self, enable):
         if enable and self.Magazine_flag:
-#            GPIO.output(self.Switch_pin, 1)
+            GPIO.output(self.Switch_pin, 1)
             print("Switch ON")
             self.Magazine_flag = False
+            time.sleep(0.05)
 
         elif not enable and not self.Magazine_flag:
-#            GPIO.output(self.Switch_pin, 0)
+            GPIO.output(self.Switch_pin, 0)
             print("Switch OFF")
             self.Magazine_flag = True
-        time.sleep(0.05)
+            time.sleep(0.05)
 
     def setRangeZ(self,x):
         if x == 0 :
@@ -78,8 +78,6 @@ class Motion:
         self._servos['Magazine_Servo'] = self.Zero_Magazie
         self.Switch_on_off_Magazine(False)
 
-    def _turnLightOff(self):
-        self._lights['light'] = 0
     def Map (self,x,motor):
         if x <= 0 :
             return self.Zero_thruster + x * self.PWM_Map_Coff_reverse
@@ -104,7 +102,6 @@ class Motion:
         r =self._Qt_String['r']
 
         theta = math.atan2(y, x)
-
         # ============== Skip ============================
         # Check https://ibb.co/ir10AV
         # R = math.hypot(x, y) * (max(abs(math.sin(theta)), abs(math.cos(theta))))
@@ -191,13 +188,6 @@ class Motion:
         elif self._Qt_String['cam'] == 8:
             self.Switch_on_off_Magazine(True)
             self._servos['Magazine_Servo'] = 2000
- 
-
-    def light(self):
-        if self._lights['light'] < 1800:
-            self._lights['light'] += 500
-        else:
-            self._lights['light'] = 0
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
@@ -206,12 +196,10 @@ class Motion:
 
     def update(self,event_name,Qt_String):
 
-
         if event_name == 'TCP_ERROR' :
             self._stopVerticalMotors()
             self._stopHorizontalMotors()
             self._setCamToNormalPosition()
-            self._turnLightOff()
             self.emit_signal("ENABLE_PID",False)
             self.emit_signal('Pilot_Enable',False)
 
@@ -232,27 +220,12 @@ class Motion:
                  self._servos['Magazine_Servo'] = self.Zero_Magazie
                  self.Switch_on_off_Magazine(False)
 
-            if self._Qt_String['light'] !=0:
-                 self.light()
-
-
-
-
-           #if self._Qt_String['z'] !=0:
-           #    self._stopHorizontalMotors()
-           #    self.calculateVerticalMotors_19()
-           #else:
-           #    self._stopVerticalMotors()
-           #    self.calculateHorizontalMotors_19()
-
         pwm = {}
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
         pwm.update(self._servos)
-
+        
         self.emit_signal('HAT',pwm)
 #        if self.delay :
 #            time.sleep(0.1) 
 #        self.delay = False
-#        self.print_PWM()
-

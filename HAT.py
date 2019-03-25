@@ -57,7 +57,6 @@ class Hat:
             if self.pilot_enable:
                 # Check for PID Enable Controlled by Equation
                 if ( device_name == "Vertical_Right" or device_name == "Vertical_Left" ) and self.Enable == True:
-                    print ("Joystick can't change in Z")
                     continue
              # ========================================================================
             # Check for Repetetion
