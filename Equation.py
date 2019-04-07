@@ -1,9 +1,11 @@
 import time
 import math
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 
 class Motion:
     def __init__(self,Qt_String):
+
+        self.Enable_GPIO = False
 
         self.emit_signal = None
         self._Qt_String = Qt_String.copy()
@@ -21,7 +23,11 @@ class Motion:
         self.Rotation_Speed = 0.40
         self.PWM_Map_Coff = (1 / self.Joystick_max) * (self.Forward - self.Zero_thruster)
         self.PWM_Map_Coff_reverse = (1 / self.Joystick_max) * (self.Zero_thruster-self.Brake)
-        self.Zero_Magazie = 1925
+
+        self.Zero_Magazie = 0
+        self.Max_Magazine = 1
+        self.Min_Magazine = -1
+
         self.CoffZ_reverse = 0.7
         self.CoffZ = 1
         self.camera_step = 5
@@ -30,7 +36,10 @@ class Motion:
 
         self.Switch_pin = 26
         self.Magazine_flag = False
-        self.Setup_GPIO()
+        if self.Enable_GPIO:
+         self.Setup_GPIO()
+         GPIO.cleanup()
+
         # =========== Motors==============
         self._horizontalMotors= {}
         self._verticalMotors  = {}
@@ -43,19 +52,23 @@ class Motion:
         # ==================================
 
     def Setup_GPIO(self):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(pin, GPIO.OUT)
-
+        # GPIO.setmode(GPIO.BCM)
+        # GPIO.setup(pin, GPIO.OUT)
+        pass
     def Switch_on_off_Magazine(self, enable):
         if enable and self.Magazine_flag:
-            GPIO.output(self.Switch_pin, 1)
-            print("Switch ON")
+            if self.Enable_GPIO:
+             self.Setup_GPIO()
+ #            GPIO.output(self.Switch_pin, 1)
+ #           print("Switch ON")
             self.Magazine_flag = False
             time.sleep(0.05)
 
         elif not enable and not self.Magazine_flag:
-            GPIO.output(self.Switch_pin, 0)
-            print("Switch OFF")
+            if self.Enable_GPIO:
+             self.Setup_GPIO()
+#            GPIO.cleanup
+#            print("Switch OFF")
             self.Magazine_flag = True
             time.sleep(0.05)
 
@@ -152,7 +165,7 @@ class Motion:
         # steps = real pwm range / freq  = 250 M / 50 = 5 M (5000000)
         # z = Motion.map (self._Qt_String['z'] , self.Joystick_min,self.Joystick_max,300,500)
         Z = self._Qt_String['z']
-#        print("=================================================================zzzzz"+str(Z))
+
         if Z >= 0:
             z = self.Zero_thruster + Z * self.CoffZ
         elif Z < 0 :
@@ -184,10 +197,10 @@ class Motion:
             self._servos['Back_Cam'] += self.camera_step
         elif self._Qt_String['cam'] == 2:
             self.Switch_on_off_Magazine(True)
-            self._servos['Magazine_Servo'] = 1800
+            self._servos['Magazine_Servo'] = self.Min_Magazine
         elif self._Qt_String['cam'] == 8:
             self.Switch_on_off_Magazine(True)
-            self._servos['Magazine_Servo'] = 2000
+            self._servos['Magazine_Servo'] = self.Max_Magazine
 
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
@@ -197,6 +210,7 @@ class Motion:
     def update(self,event_name,Qt_String):
 
         if event_name == 'TCP_ERROR' :
+            self.emit_signal("Pulley",0)
             self._stopVerticalMotors()
             self._stopHorizontalMotors()
             self._setCamToNormalPosition()
@@ -224,8 +238,10 @@ class Motion:
         pwm.update(self._horizontalMotors)
         pwm.update(self._verticalMotors)
         pwm.update(self._servos)
-        
+
         self.emit_signal('HAT',pwm)
-#        if self.delay :
-#            time.sleep(0.1) 
-#        self.delay = False
+
+        if event_name == "TCP_ERROR":
+
+            self.emit_signal("Clean_GPIO",0)
+            print("GPIO Cleanup")

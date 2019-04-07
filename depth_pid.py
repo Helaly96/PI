@@ -130,11 +130,11 @@ class PID:
     def Enable_PID(self,event,enable):
         self.enable = enable
 
-    def Control_PID(self,s):
+    def Control_PID(self):
         try:
-            while True:
+#            while True:
                if self.pilot_enable and self.enable:
-               # ==============================================================
+                # ==============================================================
                 try:
                     if self.sensor.read():
                         self.depth = self.sensor.depth()
@@ -148,16 +148,14 @@ class PID:
                     else :
                         print("Sensor read unavalable,\n")
 
-                    time.sleep(self.sample_time)
+#                    time.sleep(self.sample_time)
                 except OSError :
-                    print ("ERROR PID RAY2")
-                    continue 
+                    print ("OSERROR PID RAY2")
                 except :
                     print("ERROR IN PID LOOP")
-                    
                 # ==============================================================
-                else:
-                    time.sleep(self.sample_time/10)
+#               else:
+#                    time.sleep(self.sample_time/10)
         except KeyboardInterrupt:
             self.emit_Signal("PID",self.pwm_zero)
 

@@ -86,13 +86,20 @@ class TCP :
         pi_temp = output.decode()
         pi_temp = "\nPI_"+pi_temp
         temp = str(sensor_temp)+' '+str(pi_temp)
+        print("Temp:",temp)
         self._conn.sendall(temp.encode())
 
     def Check_for_Special_Msgs(self,msg):
-        if msg == "PID":
-            self.pilot_enable = not self.pilot_enable
+        if msg == "PID=1":
+            self.pilot_enable = True
             self._emit_Signal("Pilot_Enable",self.pilot_enable)
             return True
+
+        elif msg == "PID=0":
+            self.pilot_enable = False
+            self._emit_Signal("Pilot_Enable",self.pilot_enable)
+            return True
+
         elif msg == "Temp":
             self._emit_Signal("Temp")
             self._emit_Signal("Send_Temp"," ")
@@ -144,6 +151,7 @@ class TCP :
 
     def close(self):
         self._emit_Signal('TCP_ERROR',{})
+        self.pilot_enable = False
 
         if self._conn is not None:
             self._selector.unregister(self._conn)

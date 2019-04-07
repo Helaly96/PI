@@ -1,5 +1,5 @@
-#from dummy_depth_pid import *
-from depth_pid import *
+from dummy_depth_pid import *
+#from depth_pid import *
 from Timer import *
 from VideoStream import *
 from Network import *
@@ -7,9 +7,9 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-from HAT import *
+#from HAT import *
 from DummySensor import *
-#from DummyHat import *
+from DummyHat import *
 import selectors
 import select
 import sys
@@ -24,8 +24,8 @@ class ROV_19:
         self.Laptop_IP = '10.1.1.14'
 
         # For Local
-#        self.RaspberryPi_IP = '127.0.0.1'
-#        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
+        self.RaspberryPi_IP = '127.0.0.1'
+        self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
 
         self.Port = 9005
         self.Autonomus_Port = 9000
@@ -37,15 +37,16 @@ class ROV_19:
         self.Zero_Vertical = 400
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0}
         self.hat_delay = 0.000020 # us
+        self.sample_time = 0.01
 
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] +"," +self.Laptop_IP + ":" + self.stream_Ports[2]
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
-        self.pipeline3 = "v4l2src device=/dev/video2 ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=10.1.1.14 port=10022"
+        self.pipeline3 = "v4l2src device=/dev/video2 ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=10.1.1.14 port=1234"
         # for Laptop's Camera
 #        self.pipeline1 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! udpsink host=127.0.0.1 port=5022 sync=false"
 #        self.pipeline2 = "v4l2src ! video/x-raw,width=640,height=480 ! jpegenc ! rtpjpegpay ! multiudpsink clients=127.0.0.1:1234,127.0.0.1:5022"
 
-        # Qt String .. x=0,y=100,r=0,z=0,cam=0,light=0,
+        # Qt String .. x=0,y=100,r=0,z=0,cam=0&
         # ========================================================
 
         self.selector =selectors.DefaultSelector()
@@ -61,7 +62,10 @@ class ROV_19:
         self.timer = Timer(1)
         self.Camera = Gstreamer(self.pipeline1)
         self.Camera2 = Gstreamer(self.pipeline2)
-#        self.Camera3 =Gstreamer(self.pipeline3)
+        self.Camera3 =Gstreamer(self.pipeline3)
+
+        self.Camera.start()
+        self.Camera2.start()
 
         self.hat.add_Device('Left_Front', 7, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Front', 5, self.motion.Zero_thruster)
@@ -95,8 +99,9 @@ class ROV_19:
         self.observer_pattern.registerEventListener('Micro_ROV',self.hat.update)
         self.observer_pattern.registerEventListener('Pulley',self.hat.update)
 
+        self.observer_pattern.registerEventListener('Clean_GPIO',self.hat.update)
 
-        threading.Thread(target=self.pid.Control_PID,args=("s",)).start()
+#        threading.Thread(target=self.pid.Control_PID,args=()).start()
 
         self.main_Loop()
 
@@ -113,11 +118,13 @@ class ROV_19:
         print('Wait for zeft Qt')
         while True:
             try:
-                events = self.selector.select(2)
+                events = self.selector.select(timeout=self.sample_time)
 
- #               self.selector_print()
+#                self.selector_print()
                 for key, mask in events:
                     key.data()
+
+                self.pid.Control_PID()
 
             except (TimeoutError,ConnectionResetError) :
                 self.tcp_server.hard_Shutdown_Recreate_Socket()
@@ -127,11 +134,12 @@ class ROV_19:
                 self.selector.close()
                 self.Camera.close()
                 self.Camera2.close()
+                self.hat.Clean_GPIO()
                 return
 
             # Important
             except:
                 print("Exception Msh Ray2:",sys.exc_info()[0])
                 self.tcp_server.hard_Shutdown_Recreate_Socket()
-            
+
 ORCA = ROV_19()

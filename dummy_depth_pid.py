@@ -6,7 +6,7 @@ class MS5837_30BA():
     def setFluidDensity(self,x):
         self.x = x
     def depth(self):
-        self.y = 5022.3
+        self.y = 100
         return self.y
     def temperature(self,x):
         return 37
@@ -51,8 +51,6 @@ class PID:
         self.depth = 0.0
         self.sensor_offset = self.sensor.depth()
         self.SetPoint = 1
-        
-
         self.clear()
 
     def clear(self):
@@ -145,9 +143,9 @@ class PID:
     def Enable_PID(self,event,enable):
         self.enable = enable
 
-    def Control_PID(self,s):
+    def Control_PID(self):
         try:
-            while True:
+#
                if self.pilot_enable and self.enable:
                # ==============================================================
                 try:
@@ -163,15 +161,14 @@ class PID:
                     else :
                         print("Sensor read unavalable,\n")
 
-                    time.sleep(self.sample_time)
+#                    time.sleep(self.sample_time)
                 except OSError :
-                    print ("ERROR PID RAY2")
-                    continue 
+                    print ("OSERROR PID RAY2")
                 except :
                     print("ERROR IN PID LOOP")
-                    
+
                 # ==============================================================
-                else:
-                    time.sleep(self.sample_time/10)
+#               else:  # else for if  not try
+#                time.sleep(self.sample_time*10)
         except KeyboardInterrupt:
             self.emit_Signal("PID",self.pwm_zero)

@@ -2,9 +2,10 @@ import time
 
 class Hat:
     def __init__(self, address, frequency,delay):
+#        self._hat = Adafruit_PCA9685.PCA9685()
+#        self._hat.set_pwm_freq(frequency)
+
         self._hat= "Ray2"
- #       self._hat = Adafruit_PCA9685.PCA9685()
- #       self._hat.set_pwm_freq(frequency)
 
         self.address = address
         self.frequency = frequency
@@ -15,23 +16,43 @@ class Hat:
         self.channelZ1 = None
         self.channelZ2 = None
         self.Magazine_Channel = None
+
+        self.Max_Magazine = 1
+        self.Zero_Magazine= 0
+        self.Min_Magazine = -1
+
         self.Enable = False
         self.pilot_enable = False
-
 
         self.channel_micro = 3
         self.zero_micro = 0
         self.forward_micro = 4000
 
-        self.channel_pulley = 4
-        self.zero_pulley = 305
-        self.pulley_forward = 400
-        self.pulley_reverse = 200
+        # for Magazine
+        self.IN1 = 20 
+        self.IN2 = 21
+        self.ENA = 16
+        self.ENA_PWM = 0
+
+        # for Pulley 
+        self.IN3 = 26
+        self.IN4 = 19
+        self.ENB = 13
+        self.ENB_PWM = 0
+
+        # GPIO.setmode(GPIO.BCM)
+        # GPIO.setup(self.IN1, GPIO.OUT)
+        # GPIO.setup(self.IN2, GPIO.OUT)
+        # GPIO.setup(self.ENA, GPIO.OUT)
+
+        # GPIO.setup(self.IN3, GPIO.OUT)
+        # GPIO.setup(self.IN4, GPIO.OUT)
+        # GPIO.setup(self.ENB, GPIO.OUT)
 
         # Set the Speed of All Motors
     def add_Device(self,name,channel,zero_value):
         self._devices[name] = {'channel':channel , 'zero':zero_value , 'current': zero_value}
-#        self._hat.set_pwm(channel,0,int(zero_value))
+        # self._hat.set_pwm(channel,0,int(zero_value))
 
         if name == "Vertical_Right":
             self.channelZ1 = channel
@@ -44,11 +65,42 @@ class Hat:
             print ("Magazine Channel :",self.Magazine_Channel)
 
     def Raspberry_pi_Power(self,channel,value):
-#        self._hat.set_pwm(channel,0,value)
+        # self._hat.set_pwm(channel,0,value)
         pass
     def SIGNAL_Referance(self,Observer_Pattern_Signal):
         self.emit_signal=Observer_Pattern_Signal
 
+    def Magazine_Servo(self):
+        # take action when pulley is stoped
+        if self.ENB_PWM == 0:
+            pwm = self._devices['Magazine_Servo']['current']
+            if pwm == self.Max_Magazine:
+                print("GPIO.output(self.ENA, 1)")
+                print("GPIO.output(self.IN1, 1)")
+                print("GPIO.output(self.IN2, 0)")
+                self.ENA_PWM = 1
+
+            elif pwm == self.Zero_Magazine:
+                print ("GPIO.output(self.ENA, 0)")
+                print ("GPIO.output(self.IN1, 0)")
+                print ("GPIO.output(self.IN2, 0)")
+                self.ENA_PWM = 0
+
+            elif pwm == self.Min_Magazine:
+                print("GPIO.output(self.ENA, 1)")
+                print("GPIO.output(self.IN1, 0)")
+                print("GPIO.output(self.IN2, 1)")
+                self.ENA_PWM = 1
+
+        else :
+            self._devices['Magazine_Servo']['current'] = self.Zero_Magazine
+            print("GPIO.output(self.ENA, 0)")
+            print("GPIO.output(self.IN1, 0)")
+            print("GPIO.output(self.IN2, 0)")
+            self.ENA_PWM = 0
+            print("Stop Magazine from Magazine El72 el DC Chopper ya Sa3eeeed")
+    
+        print("ENA_PWM",self.ENA_PWM)
 
 
     def _updatePWM(self,pwms:dict):
@@ -64,34 +116,72 @@ class Hat:
                 continue
 
             self._devices[device_name]['current'] =pwms[device_name]
-#            self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
+
+            if device_name == 'Magazine_Servo':
+                self.Magazine_Servo()
+                continue
+                        
+            # self._hat.set_pwm(self._devices[device_name]['channel'],0,int(self._devices[device_name]['current']))
             time.sleep(self.delay)
-#        print(pwms)
+        print(pwms)
 
     def Pilot_Enable(self,event,enable):
         self.pilot_enable = enable
-#        if not self.pilot_enable :
-#            self._hat.set_pwm(self.channelZ1,0,self.Zero_Vertical)
-#            self._hat.set_pwm(self.channelZ2,0,self.Zero_Vertical)
-
+        if not self.pilot_enable :
+            # self._hat.set_pwm(self.channelZ1,0,self.Zero_Vertical)
+            # self._hat.set_pwm(self.channelZ2,0,self.Zero_Vertical)
+            pass
 
     def Enable_PID(self,event,value):
         self.Enable = value
 
     def Micro_ROV(self,pwm):
-        # if pwm == 0:
-        #     self._hat.set_pwm(self.channel_micro, 0, self.zero_micro)
-        # elif pwm == 1:
-        #     self._hat.set_pwm(self.channel_micro, 0, self.forward_micro)
-        pass
+        if pwm == 0:
+            self._hat.set_pwm(self.channel_micro, 0, self.zero_micro)
+        elif pwm == 1:
+            self._hat.set_pwm(self.channel_micro, 0, self.forward_micro)
+
     def Pulley(self,pwm):
-        # if pwm == 0:
-        #     self._hat.set_pwm(self.channel_pulley, 0, self.zero_pulley)
-        # elif pwm == 1:
-        #     self._hat.set_pwm(self.channel_pulley, 0,self.pulley_forward )
-        # elif pwm == -1:
-        #     self._hat.set_pwm(self.channel_pulley, 0,self.pulley_reverse )
-        pass
+        if self._devices['Magazine_Servo']['current'] != self.Zero_Magazine or self.ENA_PWM == 1:           
+
+            self._devices['Magazine_Servo']['current'] = self.Zero_Magazine
+            print("GPIO.output(self.ENA, 0)")
+            print("GPIO.output(self.IN1, 0)")
+            print("GPIO.output(self.IN2, 0)")
+            self.ENA_PWM = 0
+            print("Stop Magazine from Pulley El72 el DC Chopper ya Sa3eeeed")
+
+        if pwm == 0:
+            print("GPIO.output(self.ENB, 0)")
+            print("GPIO.output(self.IN3, 0)")
+            print("GPIO.output(self.IN4, 0)")
+            self.ENB_PWM = 0            
+
+        elif pwm == 1:
+            print("GPIO.output(self.ENB, 1)")
+            print("GPIO.output(self.IN3, 1)")
+            print("GPIO.output(self.IN4, 0)")
+            self.ENB_PWM = 1      
+
+        elif pwm == -1:
+            print("GPIO.output(self.ENB, 1)")
+            print("GPIO.output(self.IN3, 0)")
+            print("GPIO.output(self.IN4, 1)")
+            self.ENB_PWM = 1      
+        
+        print("ENB_PWM",self.ENB_PWM)
+    
+    def Clean_GPIO(self):
+            
+            # GPIO.output(self.ENA, 0)
+            # GPIO.output(self.ENB, 0)
+
+            # GPIO.output(self.IN1, 0)
+            # GPIO.output(self.IN2, 1)
+            # GPIO.output(self.IN3, 0)
+            # GPIO.output(self.IN4, 1)
+            print("HARD CLEAN GPIO")
+
     def update(self, event_name,pwm):
 
         if event_name == "HAT":
@@ -105,13 +195,26 @@ class Hat:
 
         if event_name == "Pulley":
             self.Pulley(pwm=pwm)
+        
+        if event_name == "Clean_GPIO":
+            self.Clean_GPIO()
 
     def PID_Control(self, pwm):
         if self.Enable:
-#            self._hat.set_pwm(self.channelZ1,0,int(pwm))
-#            self._hat.set_pwm(self.channelZ2,0,int(pwm))
+            # self._hat.set_pwm(self.channelZ1,0,int(pwm))
+            # self._hat.set_pwm(self.channelZ2,0,int(pwm))
             self._devices['Vertical_Left']['current'] =int(pwm)
             self._devices['Vertical_Right']['current'] =int(pwm)
 
 #            print ("Z_pwm:",pwm)
-
+    def Autonomus(self,dir:str):
+        pwm = {'Left_Front':305,'Right_Front':305,'Right_Back':305,'Left_Back':305,'Vertical_Right':305,'Vertical_Left':305}
+        if dir == "left":
+            pass
+        elif dir == "right":
+            pass
+        elif dir == "up":
+            pass
+        elif dir == "down":
+            pass
+        self._updatePWM(pwm)
