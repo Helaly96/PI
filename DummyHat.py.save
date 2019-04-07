@@ -49,9 +49,6 @@ class Hat:
         # GPIO.setup(self.IN4, GPIO.OUT)
         # GPIO.setup(self.ENB, GPIO.OUT)
 
-        self.micro_gpio = 27
-        # GPIO.setup(self.micro_gpio, GPIO.OUT)
-
         # Set the Speed of All Motors
     def add_Device(self,name,channel,zero_value):
         self._devices[name] = {'channel':channel , 'zero':zero_value , 'current': zero_value}
@@ -139,11 +136,13 @@ class Hat:
         self.Enable = value
 
     def Micro_ROV(self,pwm):
-#            GPIO.output(self.micro_gpio,pwm)
-            print("Micro GPIO ",pwm)
+        if pwm == 0:
+            self._hat.set_pwm(self.channel_micro, 0, self.zero_micro)
+        elif pwm == 1:
+            self._hat.set_pwm(self.channel_micro, 0, self.forward_micro)
 
     def Pulley(self,pwm):
-        if self._devices['Magazine_Servo']['current'] != self.Zero_Magazine or self.ENA_PWM == 1:           
+        if self._devices['Magazine_Servo']['current'] != self.Zero_Magazine or self.ENA_PWM == 1:
 
             self._devices['Magazine_Servo']['current'] = self.Zero_Magazine
             print("GPIO.output(self.ENA, 0)")
@@ -156,7 +155,7 @@ class Hat:
             print("GPIO.output(self.ENB, 0)")
             print("GPIO.output(self.IN3, 0)")
             print("GPIO.output(self.IN4, 0)")
-            self.ENB_PWM = 0            
+            self.ENB_PWM = 0
 
         elif pwm == 1:
             print("GPIO.output(self.ENB, 1)")
@@ -181,8 +180,6 @@ class Hat:
             # GPIO.output(self.IN2, 1)
             # GPIO.output(self.IN3, 0)
             # GPIO.output(self.IN4, 1)
-
-            # GPIO.output(self.micro_gpio,0)
             print("HARD CLEAN GPIO")
 
     def update(self, event_name,pwm):
@@ -204,17 +201,12 @@ class Hat:
 
     def PID_Control(self, pwm):
         if self.Enable:
-            if abs ( self._devices['Vertical_Left']['current'] - pwm ) <= 2:
-                return
-
             # self._hat.set_pwm(self.channelZ1,0,int(pwm))
-            time.sleep(self.delay)
             # self._hat.set_pwm(self.channelZ2,0,int(pwm))
-            time.sleep(self.delay)
-
             self._devices['Vertical_Left']['current'] =int(pwm)
             self._devices['Vertical_Right']['current'] =int(pwm)
-            
+
+#            print ("Z_pwm:",pwm)
     def Autonomus(self,dir:str):
         pwm = {'Left_Front':305,'Right_Front':305,'Right_Back':305,'Left_Back':305,'Vertical_Right':305,'Vertical_Left':305}
         if dir == "left":

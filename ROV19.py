@@ -1,3 +1,5 @@
+import faulthandler; faulthandler.enable()
+
 from dummy_depth_pid import *
 #from depth_pid import *
 from Timer import *
@@ -7,7 +9,7 @@ from Equation import *
 from Observer_Pattern import *
 from UDP import *
 #from Sensor import *
-#from HAT import *
+# from HAT import *
 from DummySensor import *
 from DummyHat import *
 import selectors
@@ -22,7 +24,8 @@ class ROV_19:
         # For PI 19
         self.RaspberryPi_IP = '10.1.1.15'
         self.Laptop_IP = '10.1.1.14'
-
+#        import os
+#        os.kill(os.getpid(),11)
         # For Local
         self.RaspberryPi_IP = '127.0.0.1'
         self.Laptop_IP = '127.0.0.1' # sink ( Laptop's address )
@@ -37,7 +40,7 @@ class ROV_19:
         self.Zero_Vertical = 400
         self.Qt_String = {'x':0,'y':100,'r':0,'z':0,'cam':0}
         self.hat_delay = 0.000020 # us
-        self.sample_time = 0.01
+        self.sample_time = 1
 
         self.pipeline1 = "v4l2src device=/dev/video0 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! multiudpsink clients=" + self.Laptop_IP + ":" +self.stream_Ports[1] +"," +self.Laptop_IP + ":" + self.stream_Ports[2]
         self.pipeline2 = "v4l2src device=/dev/video1 ! image/jpeg,width=1920,height=1080,framerate=30/1 ! rtpjpegpay ! udpsink host=" + self.Laptop_IP + " port=" + self.stream_Ports[0] + " sync=false"
@@ -67,8 +70,8 @@ class ROV_19:
         self.Camera.start()
         self.Camera2.start()
 
-        self.hat.add_Device('Left_Front', 7, self.motion.Zero_thruster)
-        self.hat.add_Device('Right_Front', 5, self.motion.Zero_thruster)
+        self.hat.add_Device('Left_Front', 5, self.motion.Zero_thruster)
+        self.hat.add_Device('Right_Front', 2, self.motion.Zero_thruster)
         self.hat.add_Device('Right_Back', 13,self.motion.Zero_thruster)
         self.hat.add_Device('Left_Back',15 , self.motion.Zero_thruster)
         self.hat.add_Device('Vertical_Right', 9, self.motion.Zero_thruster)
@@ -76,7 +79,7 @@ class ROV_19:
         self.hat.add_Device('Main_Cam',0,self.motion.Zero_Servo)
         self.hat.add_Device('Back_Cam',1,self.motion.Zero_Servo)
         self.hat.add_Device('Magazine_Servo',3,self.motion.Zero_Magazie)
-        self.hat.Raspberry_pi_Power(8,305)
+        self.hat.Raspberry_pi_Power(7,305)
 
         self.motion.SIGNAL_Referance(self.observer_pattern.emit_Signal)
         self.tcp_server.SIGNAL_Referance(self.observer_pattern.emit_Signal)
@@ -134,7 +137,7 @@ class ROV_19:
                 self.selector.close()
                 self.Camera.close()
                 self.Camera2.close()
-                self.hat.Clean_GPIO()
+#                self.hat.Clean_GPIO()
                 return
 
             # Important

@@ -191,10 +191,12 @@ class Motion:
     def moveCamera(self):
         if self._Qt_String['cam'] == 1 and self._servos['Main_Cam'] > self.Servo_min  :
             self._servos['Main_Cam'] -= self.camera_step
-            self._servos['Back_Cam'] -= self.camera_step
+            if self._servos['Back_Cam'] > self.Servo_min:
+              self._servos['Back_Cam'] -= self.camera_step
         elif self._Qt_String['cam'] == 4 and self._servos['Main_Cam'] < self.Servo_max:
             self._servos['Main_Cam'] += self.camera_step
-            self._servos['Back_Cam'] += self.camera_step
+            if self._servos['Back_Cam'] <= 305:
+              self._servos['Back_Cam'] += self.camera_step
         elif self._Qt_String['cam'] == 2:
             self.Switch_on_off_Magazine(True)
             self._servos['Magazine_Servo'] = self.Min_Magazine

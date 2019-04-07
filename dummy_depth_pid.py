@@ -161,7 +161,6 @@ class PID:
                     else :
                         print("Sensor read unavalable,\n")
 
-#                    time.sleep(self.sample_time)
                 except OSError :
                     print ("OSERROR PID RAY2")
                 except :
