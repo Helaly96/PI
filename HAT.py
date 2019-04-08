@@ -50,7 +50,7 @@ class Hat:
         GPIO.setup(self.IN4, GPIO.OUT)
         GPIO.setup(self.ENB, GPIO.OUT)
 
-        self.micro_gpio = 27
+        self.micro_gpio = 24
         GPIO.setup(self.micro_gpio, GPIO.OUT)
 
         # Set the Speed of All Motors
@@ -201,7 +201,7 @@ class Hat:
 
     def PID_Control(self, pwm):
         if self.Enable:
-            if abs ( self._devices['Vertical_Left']['current'] - pwm ) <= 2:
+            if abs ( self._devices['Vertical_Left']['current'] - pwm ) <= 1:
                 return
 
             self._hat.set_pwm(self.channelZ1,0,int(pwm))

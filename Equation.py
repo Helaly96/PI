@@ -16,7 +16,7 @@ class Motion:
         self.Servo_max = 360
         self.Servo_max = 390
         self.Brake = 240
-        self.Forward = 420
+        self.Forward = 400
         self.Joystick_min = -100
         self.Joystick_max = 100
         self.Rotation_Efficiency = 0.20
@@ -92,12 +92,19 @@ class Motion:
         self.Switch_on_off_Magazine(False)
 
     def Map (self,x,motor):
-        if x <= 0 :
+        if x <= 0 and motor == "Left_Front" :
             return self.Zero_thruster + x * self.PWM_Map_Coff_reverse
+        elif x <= 0 and motor == "Right_Front" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff_reverse
+        elif x <= 0 and motor == "Right_Back" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff_reverse
+        elif x <= 0 and motor == "Left_Back" :
+            return self.Zero_thruster + x * self.PWM_Map_Coff_reverse
+
         elif motor == "Left_Front" :
             return self.Zero_thruster + x * self.PWM_Map_Coff
         elif motor == "Right_Front" :
-            return self.Zero_thruster + x * self.PWM_Map_Coff * 0.7
+            return self.Zero_thruster + x * self.PWM_Map_Coff * 0.8
         elif motor == "Right_Back" :
             return self.Zero_thruster + x * self.PWM_Map_Coff * 0.8
         elif motor == "Left_Back" :
